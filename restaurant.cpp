@@ -34,7 +34,48 @@ void print(node *temp)
 		temp = temp->next;
 	}
 }
-void LAPSE_sort(node *temp)
+void LAPSE_sort(node **head)
+{
+	node *prev = (*head);
+	node *curr = (*head)->next;
+
+	// Traverse list
+	while (curr != NULL)
+	{
+		// If curr is smaller than prev,
+		// then it must be moved to head
+		if (curr->freq > prev->freq)
+		{
+			prev->next = curr->next;
+			curr->next = (*head);
+			(*head) = curr;
+			curr = prev;
+		}
+		else
+		{
+			prev = curr;
+		}
+
+		// Move current
+		curr = curr->next;
+	}
+}
+void LAPSE_caesar(node *temp)
+{
+	while (temp != nullptr)
+	{
+		if (isalpha(temp->data))
+		{
+			char base = isupper(temp->data) ? 'A' : 'a';
+			temp->data = (temp->data - base + temp->freq) % 26 + base;
+		}
+		temp = temp->next;
+	}
+}
+void deleteNode(node *p)
+{
+}
+void LAPSE_congdon(node *temp)
 {
 }
 void LAPSE_main(string name)
@@ -45,6 +86,10 @@ void LAPSE_main(string name)
 	{
 		temp = addElement(head, temp, name[i]);
 	}
+	print(head);
+	cout << endl;
+	LAPSE_caesar(head);
+	LAPSE_congdon(head);
 	print(head);
 }
 
