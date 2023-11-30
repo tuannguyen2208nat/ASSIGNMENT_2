@@ -1,4 +1,5 @@
 #include "main.h"
+
 int MAXSIZE;
 
 class node
@@ -12,6 +13,193 @@ public:
 	node(char data, node *temp) : data(data), freq(1), next(nullptr), prev(temp){};
 	node(char data) : data(data), freq(1), next(nullptr), prev(nullptr){};
 };
+///////////Huffman-tree//////////
+class AVLNode
+{
+public:
+	char data;
+	int freq;
+	AVLNode *left;
+	AVLNode *right;
+	int vitri;
+	string mahoa;
+
+	AVLNode(char data, int freq, int vitri)
+	{
+		left = right = NULL;
+		this->data = data;
+		this->freq = freq;
+		this->vitri = vitri;
+		this->mahoa = "";
+	}
+};
+int treeLevel(AVLNode *t)
+{
+	if (t == NULL)
+		return -1;
+	return 1 + max(treeLevel(t->left), treeLevel(t->right));
+}
+AVLNode *turnRight(AVLNode *a)
+{
+	AVLNode *b = a->left;
+	AVLNode *d = b->right;
+	a->left = d;
+	b->right = a;
+	return b;
+}
+AVLNode *turnLeft(AVLNode *a)
+{
+	AVLNode *b = a->right;
+	AVLNode *c = b->left;
+	a->right = c;
+	b->left = a;
+	return b;
+}
+AVLNode *updateTreeAvl(AVLNode *t)
+{
+	if (abs(treeLevel(t->left) - treeLevel(t->right)) > 1)
+	{
+		if (treeLevel(t->left) > treeLevel(t->right))
+		{
+			AVLNode *p = t->left;
+			if (treeLevel(p->left) >= treeLevel(p->right))
+			{
+				t = turnRight(t);
+			}
+			else
+			{
+				t->left = turnLeft(t->left);
+				t = turnRight(t);
+			}
+		}
+		else
+		{
+			AVLNode *p = t->right;
+			if (treeLevel(p->right) >= treeLevel(p->left))
+			{
+				t = turnLeft(t);
+			}
+			else
+			{
+				t->right = turnRight(t->right);
+				t = turnLeft(t);
+			}
+		}
+	}
+	if (t->left != NULL)
+		t->left = updateTreeAvl(t->left);
+	if (t->right != NULL)
+		t->right = updateTreeAvl(t->right);
+	return t;
+}
+
+struct compare
+{
+	bool operator()(AVLNode *l, AVLNode *r)
+	{
+		if (l->freq == r->freq)
+		{
+			return l->vitri > r->vitri;
+		}
+		return (l->freq > r->freq);
+	}
+};
+
+void encode(AVLNode *root, string str,
+			unordered_map<char, string> &huffmanCode)
+{
+	if (root == nullptr)
+		return;
+
+	if (root->data != '$')
+	{
+		huffmanCode[root->data] = str;
+	}
+
+	encode(root->left, str + "0", huffmanCode);
+	encode(root->right, str + "1", huffmanCode);
+}
+
+int binaryToDecimal(int binaryNumber)
+{
+	int decimalNumber = 0;
+	int base = 1;
+	while (binaryNumber > 0)
+	{
+		int lastDigit = binaryNumber % 10;
+		binaryNumber = binaryNumber / 10;
+		decimalNumber += lastDigit * base;
+		base = base * 2;
+	}
+	return decimalNumber;
+}
+
+int result_to_int(string result)
+{
+	int n = (int)result.size();
+	string a = "";
+
+	if (n <= 0)
+	{
+		return 0;
+	}
+	else if (n < 10)
+	{
+		for (int i = n - 1; i >= 0; i--)
+		{
+			a += result[i];
+		}
+	}
+	else if (n >= 10)
+	{
+		for (int i = n - 1; i >= (n - 10); i--)
+		{
+			a += result[i];
+		}
+	}
+	int ketqua = stoi(a);
+	return binaryToDecimal(ketqua);
+}
+
+int HuffmanCodes(node *head)
+{
+	AVLNode *left, *right, *top;
+	priority_queue<AVLNode *, vector<AVLNode *>, compare> minHeap;
+	node *temp = head;
+	int i = 0;
+	while (temp != nullptr)
+	{
+		minHeap.push(new AVLNode(temp->data, temp->freq, i));
+		temp = temp->next;
+	}
+	while (minHeap.size() != 1)
+	{
+		left = minHeap.top();
+		minHeap.pop();
+
+		right = minHeap.top();
+		minHeap.pop();
+		top = new AVLNode('$', left->freq + right->freq, i);
+		i++;
+		top->left = left;
+		top->right = right;
+		top = updateTreeAvl(top);
+		minHeap.push(top);
+	}
+	AVLNode *root = minHeap.top();
+	unordered_map<char, string> huffmanCode;
+	encode(root, "", huffmanCode);
+	string result = "";
+	while (head != nullptr)
+	{
+		char ch = head->data;
+		result += huffmanCode[ch];
+		head = head->next;
+	}
+	return result_to_int(result);
+	;
+}
+/////////End-Huffman-tree/////////
 class Linklist
 {
 public:
@@ -179,6 +367,20 @@ void LAPSE_sort(Linklist &list)
 	} while (swapped);
 }
 /////////////////
+//////NHA-HANG-S/////
+void nha_hang_s(int result)
+{
+	cout << "nha hang s" << endl;
+}
+/////END-NHA-HANG-S//////
+
+//////NHA-HANG-G/////
+void nha_hang_g(int result)
+{
+	cout << "nha hang g" << endl;
+}
+/////END-NHA-HANG-G//////
+
 void LAPSE_main(string name)
 {
 	if ((int)name.size() <= 0)
@@ -193,9 +395,10 @@ void LAPSE_main(string name)
 	arr->LAPSE_caesar();
 	arr->delete_samenode();
 
-	node *head = arr->Linklist_gethead();
 	LAPSE_sort(*arr);
-	arr->Linklist_print();
+	node *head = arr->Linklist_gethead();
+	int result = HuffmanCodes(head);
+	(result % 2 == 0) ? nha_hang_s(result) : nha_hang_g(result);
 }
 
 void LAPSE(string name)
