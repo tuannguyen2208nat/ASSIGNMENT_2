@@ -431,7 +431,6 @@ hash_table_node *hash_table[10000];
 
 void hash_table_insert(int id, int result)
 {
-
 	if (!hash_table[id])
 	{
 		BSTNode *root = new BSTNode(result);
@@ -442,6 +441,43 @@ void hash_table_insert(int id, int result)
 		BSTNode *root = hash_table[id]->root;
 		BST_insert(root, result);
 		hash_table[id]->hash_table_queue.push(result);
+	}
+}
+int sumOfSubtrees(BSTNode *root)
+{
+	if (!root)
+	{
+		return 0;
+	}
+	int leftSum = sumOfSubtrees(root->left);
+	int rightSum = sumOfSubtrees(root->right);
+	return leftSum + rightSum + 1;
+}
+int fact(int n)
+{
+	if (n == 0)
+		return 1;
+	int res = 1;
+	for (int i = 2; i <= n; i++)
+		res = res * i;
+	return res;
+}
+int nCr(int n, int r)
+{
+	return fact(n) / (fact(r) * fact(n - r));
+}
+int countBST(BSTNode *root)
+{
+	if (root != nullptr)
+	{
+		int n1 = sumOfSubtrees(root->left);
+		int n2 = sumOfSubtrees(root->right);
+		int n = n1 + n2;
+		return nCr(n, n2) * countBST(root->left) * countBST(root->right);
+	}
+	else
+	{
+		return 1;
 	}
 }
 
@@ -474,6 +510,18 @@ void LAPSE_main(string name)
 	(result % 2 == 0) ? nha_hang_s(result) : nha_hang_g(result);
 }
 
+void KOKUSEN_main()
+{
+	for (int i = 1; i < MAXSIZE; i++)
+	{
+		if (hash_table[i] != nullptr)
+		{
+			int result = countBST(hash_table[i]->root);
+			cout << result << endl;
+		}
+	}
+}
+
 void LAPSE(string name)
 {
 	cout << "LAPSE" << endl;
@@ -482,6 +530,7 @@ void LAPSE(string name)
 void KOKUSEN()
 {
 	cout << "KOKUSEN" << endl;
+	KOKUSEN_main();
 }
 void KEITEIKEN(int num)
 {
