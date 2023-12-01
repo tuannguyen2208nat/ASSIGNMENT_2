@@ -454,13 +454,13 @@ void delete_full_BST(BSTNode *root)
 		root = nullptr;
 	}
 }
-void printInorder(BSTNode *root)
+void printInorder_BST(BSTNode *root)
 {
 	if (root != nullptr)
 	{
-		printInorder(root->left);
+		printInorder_BST(root->left);
 		cout << root->result << endl;
-		printInorder(root->right);
+		printInorder_BST(root->right);
 	}
 }
 BSTNode *turnRight(BSTNode *root)
@@ -614,11 +614,11 @@ void xoa_cay_bst(int vitri, int count, int size)
 		count--;
 	}
 }
-void print(int id)
+void LIMITLESS_print(int id)
 {
 	if (hash_table[id] != nullptr)
 	{
-		printInorder(hash_table[id]->root);
+		printInorder_BST(hash_table[id]->root);
 	}
 }
 
@@ -673,7 +673,7 @@ void LIMITLESS_main(int num)
 	{
 		hash_table[num]->root = updateTreeAvl(hash_table[num]->root);
 	}
-	print(num);
+	LIMITLESS_print(num);
 }
 
 void LAPSE(string name)
