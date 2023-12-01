@@ -1,13 +1,688 @@
 #include "main.h"
+
 int MAXSIZE;
+
+class node
+{
+public:
+	char data;
+	int freq;
+	node *next;
+	node *prev;
+	node() : data('\0'), freq(0), next(nullptr), prev(nullptr){};
+	node(char data, node *temp) : data(data), freq(1), next(nullptr), prev(temp){};
+	node(char data) : data(data), freq(1), next(nullptr), prev(nullptr){};
+};
+///////////Huffman-tree//////////
+class AVLNode
+{
+public:
+	char data;
+	int freq;
+	AVLNode *left;
+	AVLNode *right;
+	int vitri;
+	string mahoa;
+
+	AVLNode(char data, int freq, int vitri)
+	{
+		left = right = NULL;
+		this->data = data;
+		this->freq = freq;
+		this->vitri = vitri;
+		this->mahoa = "";
+	}
+};
+int treeLevel(AVLNode *t)
+{
+	if (t == NULL)
+		return -1;
+	return 1 + max(treeLevel(t->left), treeLevel(t->right));
+}
+AVLNode *turnRight(AVLNode *a)
+{
+	AVLNode *b = a->left;
+	AVLNode *d = b->right;
+	a->left = d;
+	b->right = a;
+	return b;
+}
+AVLNode *turnLeft(AVLNode *a)
+{
+	AVLNode *b = a->right;
+	AVLNode *c = b->left;
+	a->right = c;
+	b->left = a;
+	return b;
+}
+AVLNode *updateTreeAvl(AVLNode *t)
+{
+	if (abs(treeLevel(t->left) - treeLevel(t->right)) > 1)
+	{
+		if (treeLevel(t->left) > treeLevel(t->right))
+		{
+			AVLNode *p = t->left;
+			if (treeLevel(p->left) >= treeLevel(p->right))
+			{
+				t = turnRight(t);
+			}
+			else
+			{
+				t->left = turnLeft(t->left);
+				t = turnRight(t);
+			}
+		}
+		else
+		{
+			AVLNode *p = t->right;
+			if (treeLevel(p->right) >= treeLevel(p->left))
+			{
+				t = turnLeft(t);
+			}
+			else
+			{
+				t->right = turnRight(t->right);
+				t = turnLeft(t);
+			}
+		}
+	}
+	if (t->left != NULL)
+		t->left = updateTreeAvl(t->left);
+	if (t->right != NULL)
+		t->right = updateTreeAvl(t->right);
+	return t;
+}
+struct compare
+{
+	bool operator()(AVLNode *l, AVLNode *r)
+	{
+		if (l->freq == r->freq)
+		{
+			return l->vitri > r->vitri;
+		}
+		return (l->freq > r->freq);
+	}
+};
+void encode(AVLNode *root, string str,
+			unordered_map<char, string> &huffmanCode)
+{
+	if (root == nullptr)
+		return;
+
+	if (root->data != '$')
+	{
+		huffmanCode[root->data] = str;
+	}
+
+	encode(root->left, str + "0", huffmanCode);
+	encode(root->right, str + "1", huffmanCode);
+}
+int binaryToDecimal(int binaryNumber)
+{
+	int decimalNumber = 0;
+	int base = 1;
+	while (binaryNumber > 0)
+	{
+		int lastDigit = binaryNumber % 10;
+		binaryNumber = binaryNumber / 10;
+		decimalNumber += lastDigit * base;
+		base = base * 2;
+	}
+	return decimalNumber;
+}
+int result_to_int(string result)
+{
+	int n = (int)result.size();
+	string a = "";
+
+	if (n <= 0)
+	{
+		return 0;
+	}
+	else if (n < 10)
+	{
+		for (int i = n - 1; i >= 0; i--)
+		{
+			a += result[i];
+		}
+	}
+	else if (n >= 10)
+	{
+		for (int i = n - 1; i >= (n - 10); i--)
+		{
+			a += result[i];
+		}
+	}
+	int ketqua = stoi(a);
+	return binaryToDecimal(ketqua);
+}
+int HuffmanCodes(node *head)
+{
+	AVLNode *left, *right, *top;
+	priority_queue<AVLNode *, vector<AVLNode *>, compare> minHeap;
+	node *temp = head;
+	int i = 0;
+	while (temp != nullptr)
+	{
+		minHeap.push(new AVLNode(temp->data, temp->freq, i));
+		temp = temp->next;
+	}
+	while (minHeap.size() != 1)
+	{
+		left = minHeap.top();
+		minHeap.pop();
+
+		right = minHeap.top();
+		minHeap.pop();
+		top = new AVLNode('$', left->freq + right->freq, i);
+		i++;
+		top->left = left;
+		top->right = right;
+		top = updateTreeAvl(top);
+		minHeap.push(top);
+	}
+	AVLNode *root = minHeap.top();
+	unordered_map<char, string> huffmanCode;
+	encode(root, "", huffmanCode);
+	string result = "";
+	while (head != nullptr)
+	{
+		char ch = head->data;
+		result += huffmanCode[ch];
+		head = head->next;
+	}
+	return result_to_int(result);
+}
+/////////End-Huffman-tree/////////
+class Linklist
+{
+public:
+	node *head;
+	node *tail;
+	/////////////////
+	void Linklist_print()
+	{
+		node *temp = head;
+		while (temp != nullptr)
+		{
+			cout << temp->data << " " << temp->freq << endl;
+			temp = temp->next;
+		}
+	}
+	/////////////////
+	int Linklist_size()
+	{
+		int count = 0;
+		node *temp = head;
+		while (temp != nullptr)
+		{
+			count++;
+			temp = temp->next;
+		}
+		return count;
+	}
+	/////////////////
+	node *Linklist_gethead()
+	{
+		return head;
+	}
+	/////////////////
+	void LAPSE_caesar()
+	{
+		node *temp = head;
+		while (temp != nullptr)
+		{
+			if (isalpha(temp->data))
+			{
+				char base = isupper(temp->data) ? 'A' : 'a';
+				temp->data = (temp->data - base + temp->freq) % 26 + base;
+			}
+			temp = temp->next;
+		}
+	}
+	/////////////////
+	node *search_node(char data)
+	{
+		node *current = head;
+		while (current != nullptr)
+		{
+			if (current->data == data)
+			{
+				break;
+			}
+			current = current->next;
+		}
+		return current;
+	}
+	void delete_samenode()
+	{
+		set<char> seenData;
+		node *current = head;
+
+		while (current != nullptr)
+		{
+			if (seenData.count(current->data) > 0)
+			{
+				node *p = search_node(current->data);
+				int n = current->freq;
+				p->freq += n;
+				node *temp = current;
+				current = current->next;
+
+				if (temp->prev != nullptr)
+				{
+					temp->prev->next = temp->next;
+				}
+				else
+				{
+					head = temp->next;
+				}
+
+				if (temp->next != nullptr)
+				{
+					temp->next->prev = temp->prev;
+				}
+				else
+				{
+					tail = temp->prev;
+				}
+
+				delete temp;
+			}
+			else
+			{
+				seenData.insert(current->data);
+				current = current->next;
+			}
+		}
+	}
+	/////////////////
+};
+
+Linklist *newlist(char data)
+{
+	Linklist *arr = new Linklist;
+	arr->head = new node(data);
+	arr->tail = arr->head;
+	return arr;
+}
+Linklist *addElement(Linklist *arr, char data)
+{
+	node *temp = arr->head;
+	while (temp != nullptr)
+	{
+		if (temp->data == data)
+		{
+			temp->freq++;
+			return arr;
+		}
+		temp = temp->next;
+	}
+	node *p = new node(data, arr->tail);
+	arr->tail->next = p;
+	arr->tail = p;
+	return arr;
+}
+/////////////////
+void swap(node *a, node *b)
+{
+	char temp_data = a->data;
+	int temp_freq = a->freq;
+	a->data = b->data;
+	a->freq = b->freq;
+	b->data = temp_data;
+	b->freq = temp_freq;
+}
+void LAPSE_sort(Linklist &list)
+{
+	if (list.head == nullptr || list.head->next == nullptr)
+	{
+		return;
+	}
+	bool swapped;
+	node *ptr1;
+	node *lptr = nullptr;
+	do
+	{
+		swapped = false;
+		ptr1 = list.head;
+
+		while (ptr1->next != lptr)
+		{
+			if (ptr1->freq > ptr1->next->freq || (ptr1->freq == ptr1->next->freq && int(ptr1->data) > int(ptr1->next->data)))
+			{
+				swap(ptr1, ptr1->next);
+				swapped = true;
+			}
+			ptr1 = ptr1->next;
+		}
+		lptr = ptr1;
+	} while (swapped);
+}
+/////////////////
+
+//////NHA-HANG-S/////
+void nha_hang_s(int result)
+{
+	cout << "nha hang s" << endl;
+}
+/////END-NHA-HANG-S//////
+
+//////NHA-HANG-G/////
+
+/// BST///
+class BSTNode
+{
+public:
+	int result;
+	BSTNode *left;
+	BSTNode *right;
+
+	BSTNode() : result(0), left(nullptr), right(nullptr) {}
+
+	BSTNode(int result) : result(result), left(nullptr), right(nullptr) {}
+
+	BSTNode(int result, BSTNode *&left, BSTNode *&right) : result(result), left(left), right(right) {}
+};
+BSTNode *BST_insert(BSTNode *root, int result)
+{
+	if (!root)
+	{
+		return new BSTNode(result);
+	}
+
+	if (result < root->result)
+	{
+		root->left = BST_insert(root->left, result);
+	}
+	else if (result >= root->result)
+	{
+		root->right = BST_insert(root->right, result);
+	}
+	return root;
+}
+BSTNode *minValueNode(BSTNode *node)
+{
+	BSTNode *current = node;
+	while (current && current->left)
+	{
+		current = current->left;
+	}
+	return current;
+}
+BSTNode *deleteNode(BSTNode *root, int key)
+{
+	if (!root)
+	{
+		return root;
+	}
+	if (key < root->result)
+	{
+		root->left = deleteNode(root->left, key);
+	}
+	else if (key > root->result)
+	{
+		root->right = deleteNode(root->right, key);
+	}
+	else
+	{
+		if (!root->left)
+		{
+			BSTNode *temp = root->right;
+			delete root;
+			return temp;
+		}
+		else if (!root->right)
+		{
+			BSTNode *temp = root->left;
+			delete root;
+			return temp;
+		}
+		BSTNode *temp = minValueNode(root->right);
+		root->result = temp->result;
+		root->right = deleteNode(root->right, temp->result);
+	}
+	return root;
+}
+void delete_full_BST(BSTNode *root)
+{
+	if (root)
+	{
+		delete_full_BST(root->left);
+		delete_full_BST(root->right);
+		delete root;
+		root = nullptr;
+	}
+}
+void printInorder_BST(BSTNode *root)
+{
+	if (root != nullptr)
+	{
+		printInorder_BST(root->left);
+		cout << root->result << endl;
+		printInorder_BST(root->right);
+	}
+}
+BSTNode *turnRight(BSTNode *root)
+{
+	BSTNode *b = root->left;
+	BSTNode *d = b->right;
+	root->left = d;
+	b->right = root;
+	return b;
+}
+BSTNode *turnLeft(BSTNode *root)
+{
+	BSTNode *b = root->right;
+	BSTNode *c = b->left;
+	root->right = c;
+	b->left = root;
+	return b;
+}
+int treeLevel(BSTNode *root)
+{
+	if (root == NULL)
+		return -1;
+	return 1 + max(treeLevel(root->left), treeLevel(root->right));
+}
+bool checkAvl(BSTNode *root)
+{
+	if (root == NULL)
+		return true;
+	if (abs(treeLevel(root->left) - treeLevel(root->right)) > 1)
+		return false;
+	return checkAvl(root->left) && checkAvl(root->right);
+}
+BSTNode *updateTreeAvl(BSTNode *root)
+{
+	if (abs(treeLevel(root->left) - treeLevel(root->right)) > 1)
+	{
+		if (treeLevel(root->left) > treeLevel(root->right))
+		{
+			BSTNode *p = root->left;
+			if (treeLevel(p->left) >= treeLevel(p->right))
+			{
+				root = turnRight(root);
+			}
+			else
+			{
+				root->left = turnLeft(root->left);
+				root = turnRight(root);
+			}
+		}
+		else
+		{
+			BSTNode *p = root->right;
+			if (treeLevel(p->right) >= treeLevel(p->left))
+			{
+				root = turnLeft(root);
+			}
+			else
+			{
+				root->right = turnRight(root->right);
+				root = turnLeft(root);
+			}
+		}
+	}
+	if (root->left != NULL)
+		root->left = updateTreeAvl(root->left);
+	if (root->right != NULL)
+		root->right = updateTreeAvl(root->right);
+	return root;
+}
+/// END-BST///
+
+class hash_table_node
+{
+public:
+	BSTNode *root;
+	queue<int> hash_table_queue;
+	hash_table_node *next;
+
+	hash_table_node(BSTNode *root, int result)
+	{
+		this->root = root;
+		hash_table_queue.push(result);
+		this->next = nullptr;
+	}
+};
+
+hash_table_node *hash_table[10000];
+
+void hash_table_insert(int id, int result)
+{
+	if (!hash_table[id])
+	{
+		BSTNode *root = new BSTNode(result);
+		hash_table[id] = new hash_table_node(root, result);
+	}
+	else
+	{
+		BSTNode *root = hash_table[id]->root;
+		BST_insert(root, result);
+		hash_table[id]->hash_table_queue.push(result);
+	}
+}
+int sumOfSubtrees(BSTNode *root)
+{
+	if (!root)
+	{
+		return 0;
+	}
+	int leftSum = sumOfSubtrees(root->left);
+	int rightSum = sumOfSubtrees(root->right);
+	return leftSum + rightSum + 1;
+}
+int fact(int n)
+{
+	if (n == 0)
+		return 1;
+	int res = 1;
+	for (int i = 2; i <= n; i++)
+		res = res * i;
+	return res;
+}
+int nCr(int n, int r)
+{
+	return fact(n) / (fact(r) * fact(n - r));
+}
+int countBST(BSTNode *root)
+{
+	if (root != nullptr)
+	{
+		int n1 = sumOfSubtrees(root->left);
+		int n2 = sumOfSubtrees(root->right);
+		int n = n1 + n2;
+		return nCr(n, n2) * countBST(root->left) * countBST(root->right);
+	}
+
+	return 1;
+}
+void xoa_cay_bst(int vitri, int count, int size)
+{
+	if (count >= size)
+	{
+		delete_full_BST(hash_table[vitri]->root);
+		hash_table[vitri] = nullptr;
+		return;
+	}
+	while (count > 0)
+	{
+		int val = (hash_table[vitri]->hash_table_queue).front();
+		hash_table[vitri]->root = deleteNode(hash_table[vitri]->root, val);
+		(hash_table[vitri]->hash_table_queue).pop();
+		count--;
+	}
+}
+void LIMITLESS_print(int id)
+{
+	if (hash_table[id] != nullptr)
+	{
+		printInorder_BST(hash_table[id]->root);
+	}
+}
+
+void nha_hang_g(int result)
+{
+	int id = (result % MAXSIZE) + 1;
+	hash_table_insert(id, result);
+}
+/////END-NHA-HANG-G//////
+
+void LAPSE_main(string name)
+{
+	if ((int)name.size() <= 0)
+	{
+		return;
+	}
+	Linklist *arr = newlist(name[0]);
+	for (int i = 1; i < (int)name.size(); i++)
+	{
+		arr = addElement(arr, name[i]);
+	}
+	arr->LAPSE_caesar();
+	arr->delete_samenode();
+
+	LAPSE_sort(*arr);
+	node *head = arr->Linklist_gethead();
+	int result = HuffmanCodes(head);
+	(result % 2 == 0) ? nha_hang_s(result) : nha_hang_g(result);
+}
+
+void KOKUSEN_main()
+{
+	for (int id = 1; id <= MAXSIZE; id++)
+	{
+		if (hash_table[id] != nullptr)
+		{
+			int count = countBST(hash_table[id]->root);
+			count %= MAXSIZE;
+			int size = (hash_table[id]->hash_table_queue).size();
+			xoa_cay_bst(id, count, size);
+		}
+	}
+}
+
+void LIMITLESS_main(int num)
+{
+	if (!hash_table[num])
+	{
+		return;
+	}
+	while (!checkAvl(hash_table[num]->root))
+	{
+		hash_table[num]->root = updateTreeAvl(hash_table[num]->root);
+	}
+	LIMITLESS_print(num);
+}
 
 void LAPSE(string name)
 {
-	cout << "LAPSE" << endl;
+	LAPSE_main(name);
 }
 void KOKUSEN()
 {
-	cout << "KOKUSEN" << endl;
+	KOKUSEN_main();
 }
 void KEITEIKEN(int num)
 {
@@ -20,8 +695,7 @@ void HAND()
 }
 void LIMITLESS(int num)
 {
-	cout << "LIMITLESS"
-		 << " " << num << endl;
+	LIMITLESS_main(num);
 }
 void CLEAVE(int num)
 {
