@@ -640,6 +640,10 @@ void LAPSE_main(string name)
 	{
 		arr = addElement(arr, name[i]);
 	}
+	if ((arr->Linklist_size()) < 3)
+	{
+		return;
+	}
 	arr->LAPSE_caesar();
 	arr->delete_samenode();
 
