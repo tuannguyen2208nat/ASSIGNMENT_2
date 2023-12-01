@@ -384,15 +384,6 @@ public:
 
 	BSTNode(int result, BSTNode *&left, BSTNode *&right) : result(result), left(left), right(right) {}
 };
-void printPostorder(BSTNode *root)
-{
-	if (root)
-	{
-		printPostorder(root->left);
-		cout << root->result << " ";
-		printPostorder(root->right);
-	}
-}
 BSTNode *BST_insert(BSTNode *root, int result)
 {
 	if (!root)
@@ -404,7 +395,7 @@ BSTNode *BST_insert(BSTNode *root, int result)
 	{
 		root->left = BST_insert(root->left, result);
 	}
-	else if (result > root->result)
+	else if (result >= root->result)
 	{
 		root->right = BST_insert(root->right, result);
 	}
@@ -453,18 +444,91 @@ BSTNode *deleteNode(BSTNode *root, int key)
 	}
 	return root;
 }
-void delete_full_BST(BSTNode *&root)
+void delete_full_BST(BSTNode *root)
 {
 	if (root)
 	{
-		// Delete left and right subtrees
 		delete_full_BST(root->left);
 		delete_full_BST(root->right);
-
-		// Delete current node
 		delete root;
 		root = nullptr;
 	}
+}
+void printInorder(BSTNode *root)
+{
+	if (root != nullptr)
+	{
+		printInorder(root->left);
+		cout << root->result << endl;
+		printInorder(root->right);
+	}
+}
+BSTNode *turnRight(BSTNode *root)
+{
+	BSTNode *b = root->left;
+	BSTNode *d = b->right;
+	root->left = d;
+	b->right = root;
+	return b;
+}
+BSTNode *turnLeft(BSTNode *root)
+{
+	BSTNode *b = root->right;
+	BSTNode *c = b->left;
+	root->right = c;
+	b->left = root;
+	return b;
+}
+int treeLevel(BSTNode *root)
+{
+	if (root == NULL)
+		return -1;
+	return 1 + max(treeLevel(root->left), treeLevel(root->right));
+}
+bool checkAvl(BSTNode *root)
+{
+	if (root == NULL)
+		return true;
+	if (abs(treeLevel(root->left) - treeLevel(root->right)) > 1)
+		return false;
+	return checkAvl(root->left) && checkAvl(root->right);
+}
+BSTNode *updateTreeAvl(BSTNode *root)
+{
+	if (abs(treeLevel(root->left) - treeLevel(root->right)) > 1)
+	{
+		if (treeLevel(root->left) > treeLevel(root->right))
+		{
+			BSTNode *p = root->left;
+			if (treeLevel(p->left) >= treeLevel(p->right))
+			{
+				root = turnRight(root);
+			}
+			else
+			{
+				root->left = turnLeft(root->left);
+				root = turnRight(root);
+			}
+		}
+		else
+		{
+			BSTNode *p = root->right;
+			if (treeLevel(p->right) >= treeLevel(p->left))
+			{
+				root = turnLeft(root);
+			}
+			else
+			{
+				root->right = turnRight(root->right);
+				root = turnLeft(root);
+			}
+		}
+	}
+	if (root->left != NULL)
+		root->left = updateTreeAvl(root->left);
+	if (root->right != NULL)
+		root->right = updateTreeAvl(root->right);
+	return root;
 }
 /// END-BST///
 
@@ -531,19 +595,18 @@ int countBST(BSTNode *root)
 		int n = n1 + n2;
 		return nCr(n, n2) * countBST(root->left) * countBST(root->right);
 	}
-	else
-	{
-		return 1;
-	}
+
+	return 1;
 }
 void xoa_cay_bst(int vitri, int count, int size)
 {
 	if (count >= size)
 	{
 		delete_full_BST(hash_table[vitri]->root);
+		hash_table[vitri] = nullptr;
 		return;
 	}
-	while (count >= 0)
+	while (count > 0)
 	{
 		int val = (hash_table[vitri]->hash_table_queue).front();
 		hash_table[vitri]->root = deleteNode(hash_table[vitri]->root, val);
@@ -551,11 +614,17 @@ void xoa_cay_bst(int vitri, int count, int size)
 		count--;
 	}
 }
+void print(int id)
+{
+	if (hash_table[id] != nullptr)
+	{
+		printInorder(hash_table[id]->root);
+	}
+}
+
 void nha_hang_g(int result)
 {
 	int id = (result % MAXSIZE) + 1;
-	cout << id << endl;
-	cout << "nha hang g" << endl;
 	hash_table_insert(id, result);
 }
 /////END-NHA-HANG-G//////
@@ -582,26 +651,37 @@ void LAPSE_main(string name)
 
 void KOKUSEN_main()
 {
-	for (int i = 1; i < MAXSIZE; i++)
+	for (int id = 1; id <= MAXSIZE; id++)
 	{
-		if (hash_table[i] != nullptr)
+		if (hash_table[id] != nullptr)
 		{
-			int count = countBST(hash_table[i]->root);
+			int count = countBST(hash_table[id]->root);
 			count %= MAXSIZE;
-			int size = (hash_table[i]->hash_table_queue).size();
-			xoa_cay_bst(i, count, size);
+			int size = (hash_table[id]->hash_table_queue).size();
+			xoa_cay_bst(id, count, size);
 		}
 	}
 }
 
+void LIMITLESS_main(int num)
+{
+	if (!hash_table[num])
+	{
+		return;
+	}
+	while (!checkAvl(hash_table[num]->root))
+	{
+		hash_table[num]->root = updateTreeAvl(hash_table[num]->root);
+	}
+	print(num);
+}
+
 void LAPSE(string name)
 {
-	cout << "LAPSE" << endl;
 	LAPSE_main(name);
 }
 void KOKUSEN()
 {
-	cout << "KOKUSEN" << endl;
 	KOKUSEN_main();
 }
 void KEITEIKEN(int num)
@@ -615,8 +695,7 @@ void HAND()
 }
 void LIMITLESS(int num)
 {
-	cout << "LIMITLESS"
-		 << " " << num << endl;
+	LIMITLESS_main(num);
 }
 void CLEAVE(int num)
 {
