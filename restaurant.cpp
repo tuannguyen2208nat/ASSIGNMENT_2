@@ -410,6 +410,62 @@ BSTNode *BST_insert(BSTNode *root, int result)
 	}
 	return root;
 }
+BSTNode *minValueNode(BSTNode *node)
+{
+	BSTNode *current = node;
+	while (current && current->left)
+	{
+		current = current->left;
+	}
+	return current;
+}
+BSTNode *deleteNode(BSTNode *root, int key)
+{
+	if (!root)
+	{
+		return root;
+	}
+	if (key < root->result)
+	{
+		root->left = deleteNode(root->left, key);
+	}
+	else if (key > root->result)
+	{
+		root->right = deleteNode(root->right, key);
+	}
+	else
+	{
+		if (!root->left)
+		{
+			BSTNode *temp = root->right;
+			delete root;
+			return temp;
+		}
+		else if (!root->right)
+		{
+			BSTNode *temp = root->left;
+			delete root;
+			return temp;
+		}
+		BSTNode *temp = minValueNode(root->right);
+		root->result = temp->result;
+		root->right = deleteNode(root->right, temp->result);
+	}
+	return root;
+}
+void delete_full_BST(BSTNode *&root)
+{
+	if (root)
+	{
+		// Delete left and right subtrees
+		delete_full_BST(root->left);
+		delete_full_BST(root->right);
+
+		// Delete current node
+		delete root;
+		root = nullptr;
+	}
+}
 /// END-BST///
 
 class hash_table_node
@@ -480,7 +536,21 @@ int countBST(BSTNode *root)
 		return 1;
 	}
 }
-
+void xoa_cay_bst(int vitri, int count, int size)
+{
+	if (count >= size)
+	{
+		delete_full_BST(hash_table[vitri]->root);
+		return;
+	}
+	while (count >= 0)
+	{
+		int val = (hash_table[vitri]->hash_table_queue).front();
+		hash_table[vitri]->root = deleteNode(hash_table[vitri]->root, val);
+		(hash_table[vitri]->hash_table_queue).pop();
+		count--;
+	}
+}
 void nha_hang_g(int result)
 {
 	int id = (result % MAXSIZE) + 1;
@@ -516,8 +586,10 @@ void KOKUSEN_main()
 	{
 		if (hash_table[i] != nullptr)
 		{
-			int result = countBST(hash_table[i]->root);
-			cout << result << endl;
+			int count = countBST(hash_table[i]->root);
+			count %= MAXSIZE;
+			int size = (hash_table[i]->hash_table_queue).size();
+			xoa_cay_bst(i, count, size);
 		}
 	}
 }
