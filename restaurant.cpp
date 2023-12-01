@@ -485,51 +485,6 @@ int treeLevel(BSTNode *root)
 		return -1;
 	return 1 + max(treeLevel(root->left), treeLevel(root->right));
 }
-bool checkAvl(BSTNode *root)
-{
-	if (root == NULL)
-		return true;
-	if (abs(treeLevel(root->left) - treeLevel(root->right)) > 1)
-		return false;
-	return checkAvl(root->left) && checkAvl(root->right);
-}
-BSTNode *updateTreeAvl(BSTNode *root)
-{
-	if (abs(treeLevel(root->left) - treeLevel(root->right)) > 1)
-	{
-		if (treeLevel(root->left) > treeLevel(root->right))
-		{
-			BSTNode *p = root->left;
-			if (treeLevel(p->left) >= treeLevel(p->right))
-			{
-				root = turnRight(root);
-			}
-			else
-			{
-				root->left = turnLeft(root->left);
-				root = turnRight(root);
-			}
-		}
-		else
-		{
-			BSTNode *p = root->right;
-			if (treeLevel(p->right) >= treeLevel(p->left))
-			{
-				root = turnLeft(root);
-			}
-			else
-			{
-				root->right = turnRight(root->right);
-				root = turnLeft(root);
-			}
-		}
-	}
-	if (root->left != NULL)
-		root->left = updateTreeAvl(root->left);
-	if (root->right != NULL)
-		root->right = updateTreeAvl(root->right);
-	return root;
-}
 /// END-BST///
 
 class hash_table_node
@@ -672,10 +627,6 @@ void LIMITLESS_main(int num)
 	if (!hash_table[num])
 	{
 		return;
-	}
-	while (!checkAvl(hash_table[num]->root))
-	{
-		hash_table[num]->root = updateTreeAvl(hash_table[num]->root);
 	}
 	LIMITLESS_print(num);
 }
