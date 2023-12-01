@@ -92,7 +92,6 @@ AVLNode *updateTreeAvl(AVLNode *t)
 		t->right = updateTreeAvl(t->right);
 	return t;
 }
-
 struct compare
 {
 	bool operator()(AVLNode *l, AVLNode *r)
@@ -104,7 +103,6 @@ struct compare
 		return (l->freq > r->freq);
 	}
 };
-
 void encode(AVLNode *root, string str,
 			unordered_map<char, string> &huffmanCode)
 {
@@ -119,7 +117,6 @@ void encode(AVLNode *root, string str,
 	encode(root->left, str + "0", huffmanCode);
 	encode(root->right, str + "1", huffmanCode);
 }
-
 int binaryToDecimal(int binaryNumber)
 {
 	int decimalNumber = 0;
@@ -133,7 +130,6 @@ int binaryToDecimal(int binaryNumber)
 	}
 	return decimalNumber;
 }
-
 int result_to_int(string result)
 {
 	int n = (int)result.size();
@@ -160,7 +156,6 @@ int result_to_int(string result)
 	int ketqua = stoi(a);
 	return binaryToDecimal(ketqua);
 }
-
 int HuffmanCodes(node *head)
 {
 	AVLNode *left, *right, *top;
@@ -197,7 +192,6 @@ int HuffmanCodes(node *head)
 		head = head->next;
 	}
 	return result_to_int(result);
-	;
 }
 /////////End-Huffman-tree/////////
 class Linklist
@@ -345,7 +339,6 @@ void LAPSE_sort(Linklist &list)
 	{
 		return;
 	}
-
 	bool swapped;
 	node *ptr1;
 	node *lptr = nullptr;
@@ -367,6 +360,7 @@ void LAPSE_sort(Linklist &list)
 	} while (swapped);
 }
 /////////////////
+
 //////NHA-HANG-S/////
 void nha_hang_s(int result)
 {
@@ -375,9 +369,88 @@ void nha_hang_s(int result)
 /////END-NHA-HANG-S//////
 
 //////NHA-HANG-G/////
+
+/// BST///
+class BSTNode
+{
+public:
+	int result;
+	BSTNode *left;
+	BSTNode *right;
+
+	BSTNode() : result(0), left(nullptr), right(nullptr) {}
+
+	BSTNode(int result) : result(result), left(nullptr), right(nullptr) {}
+
+	BSTNode(int result, BSTNode *&left, BSTNode *&right) : result(result), left(left), right(right) {}
+};
+void printPostorder(BSTNode *root)
+{
+	if (root)
+	{
+		printPostorder(root->left);
+		cout << root->result << " ";
+		printPostorder(root->right);
+	}
+}
+BSTNode *BST_insert(BSTNode *root, int result)
+{
+	if (!root)
+	{
+		return new BSTNode(result);
+	}
+
+	if (result < root->result)
+	{
+		root->left = BST_insert(root->left, result);
+	}
+	else if (result > root->result)
+	{
+		root->right = BST_insert(root->right, result);
+	}
+	return root;
+}
+/// END-BST///
+
+class hash_table_node
+{
+public:
+	BSTNode *root;
+	queue<int> hash_table_queue;
+	hash_table_node *next;
+
+	hash_table_node(BSTNode *root, int result)
+	{
+		this->root = root;
+		hash_table_queue.push(result);
+		this->next = nullptr;
+	}
+};
+
+hash_table_node *hash_table[10000];
+
+void hash_table_insert(int id, int result)
+{
+
+	if (!hash_table[id])
+	{
+		BSTNode *root = new BSTNode(result);
+		hash_table[id] = new hash_table_node(root, result);
+	}
+	else
+	{
+		BSTNode *root = hash_table[id]->root;
+		BST_insert(root, result);
+		hash_table[id]->hash_table_queue.push(result);
+	}
+}
+
 void nha_hang_g(int result)
 {
+	int id = (result % MAXSIZE) + 1;
+	cout << id << endl;
 	cout << "nha hang g" << endl;
+	hash_table_insert(id, result);
 }
 /////END-NHA-HANG-G//////
 
