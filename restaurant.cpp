@@ -55,6 +55,14 @@ AVLNode *turnLeft(AVLNode *a)
 	b->left = a;
 	return b;
 }
+bool checkAvl(AVLNode *t)
+{
+	if (t == NULL)
+		return true;
+	if (abs(treeLevel(t->left) - treeLevel(t->right)) > 1)
+		return false;
+	return checkAvl(t->left) && checkAvl(t->right);
+}
 AVLNode *updateTreeAvl(AVLNode *t)
 {
 	if (abs(treeLevel(t->left) - treeLevel(t->right)) > 1)
@@ -178,7 +186,10 @@ int HuffmanCodes(node *head)
 		i++;
 		top->left = left;
 		top->right = right;
-		top = updateTreeAvl(top);
+		while (!checkAvl(top))
+		{
+			top = updateTreeAvl(top);
+		}
 		minHeap.push(top);
 	}
 	AVLNode *root = minHeap.top();
