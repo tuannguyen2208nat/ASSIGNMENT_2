@@ -373,9 +373,238 @@ void LAPSE_sort(Linklist &list)
 /////////////////
 
 //////NHA-HANG-S/////
+class minheap_node
+{
+public:
+	int id;
+	int freq;
+	deque<int> minheap_node_result;
+
+	minheap_node(int id, int result)
+	{
+		this->id = id;
+		this->freq = 1;
+		minheap_node_result.push_back(result);
+	}
+
+	void print()
+	{
+		int n = minheap_node_result.size();
+		cout << "id : " << id << " "
+			 << "freq : " << freq << endl;
+		for (int i = 0; i < n; i++)
+		{
+			cout << minheap_node_result[i] << " ";
+		}
+		cout << endl;
+	}
+
+	void MINHEAP_print(int num)
+	{
+		int n = minheap_node_result.size();
+		if (num <= 0 || n <= 0)
+		{
+			return;
+		}
+
+		if (num >= n)
+		{
+			for (int i = n - 1; i >= 0; i--)
+			{
+				cout << id << "-" << minheap_node_result[i] << endl;
+			}
+		}
+		else
+		{
+			for (int i = n - 1; i >= (n - num); i--)
+			{
+				cout << id << "-" << minheap_node_result[i] << endl;
+			}
+		}
+	}
+};
+
+class minHeap
+{
+public:
+	vector<minheap_node> heap;
+	vector<int> thutuid;
+
+	int minheap_parent(int index)
+	{
+		return (index - 1) / 2;
+	}
+
+	int minheap_left(int index)
+	{
+		return (2 * index + 1);
+	}
+
+	int minheap_right(int index)
+	{
+		return (2 * index + 2);
+	}
+
+	int left_right_order(int left, int right)
+	{
+		int n = thutuid.size();
+		int largest = 0;
+		for (int i = 0; i < n; i++)
+		{
+			if (thutuid[i] == heap[left].id)
+			{
+				largest = left;
+				break;
+			}
+			if (thutuid[i] == heap[right].id)
+			{
+				largest = right;
+				break;
+			}
+		}
+		return largest;
+	}
+
+	void reheapup(int index)
+	{
+		int parentIndex = minheap_parent(index);
+		while (index > 0 && heap[index].freq < heap[parentIndex].freq)
+		{
+			std::swap(heap[index], heap[parentIndex]);
+			index = parentIndex;
+			parentIndex = (index - 1) / 2;
+		}
+	}
+
+	void reheapdown(int index)
+	{
+		int leftChild = minheap_left(index);
+		int rightChild = minheap_right(index);
+		int smallest = index;
+
+		if (leftChild < (int)heap.size() && heap[leftChild].freq < heap[smallest].freq)
+		{
+			smallest = leftChild;
+		}
+
+		if (rightChild < (int)heap.size())
+		{
+			if (heap[rightChild].freq < heap[smallest].freq)
+			{
+				smallest = rightChild;
+			}
+			else if (heap[rightChild].freq == heap[smallest].freq)
+			{
+				smallest = left_right_order(smallest, rightChild);
+			}
+		}
+
+		if (smallest != index)
+		{
+			swap(heap[index], heap[smallest]);
+			reheapdown(smallest);
+		}
+	}
+
+	void minheap_update()
+	{
+		for (int i = 0; i < (int)heap.size(); i++)
+		{
+			int parent = minheap_parent(i);
+			if (parent < (int)heap.size())
+			{
+				if (heap[i].freq < heap[parent].freq)
+				{
+					reheapup(i);
+				}
+				else
+				{
+					reheapdown(i);
+				}
+			}
+		}
+	}
+
+	bool check_id(int id, int result)
+	{
+		for (int i = 0; i < (int)heap.size(); i++)
+		{
+			if (heap[i].id == id)
+			{
+				(heap[i].minheap_node_result).push_back(result);
+				(heap[i].freq) += 1;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void insert(int id, int result)
+	{
+		thutuid.push_back(id);
+		if (!check_id(id, result))
+		{
+			minheap_node min_heap(id, result);
+			heap.push_back(min_heap);
+			reheapup(heap.size() - 1);
+		}
+		minheap_update();
+	}
+
+	int minheap_size()
+	{
+		return (int)heap.size();
+	}
+
+	void minheap_delete(int vitri, int num)
+	{
+		int id = vitri;
+		int n = heap[id].freq;
+		if (num >= n)
+		{
+			while (!(heap[id].minheap_node_result.empty()))
+			{
+				cout << heap[id].minheap_node_result.front() << "-" << heap[id].id << endl;
+				heap[id].minheap_node_result.pop_front();
+			}
+			heap.erase(heap.begin() + id);
+		}
+		else
+		{
+			int count = 0;
+			while (count != num)
+			{
+				cout << heap[id].minheap_node_result.front() << "-" << heap[id].id << endl;
+				heap[id].minheap_node_result.pop_front();
+				heap[id].freq -= 1;
+				count++;
+			}
+		}
+		minheap_update();
+	}
+
+	void MINHEAP_preorder(int index, int num)
+	{
+		if (index < (int)heap.size())
+		{
+			heap[index].MINHEAP_print(num);				 // Print the current node
+			MINHEAP_preorder(minheap_left(index), num);	 // Recursively print left subtree
+			MINHEAP_preorder(minheap_right(index), num); // Recursively print right subtree
+		}
+	}
+};
+
+minHeap HEAP;
+
+void MINHEAP_main(int id, int result)
+{
+	HEAP.insert(id, result);
+}
+
 void nha_hang_s(int result)
 {
-	cout << "nha hang s" << endl;
+	int id = (result % MAXSIZE) + 1;
+	MINHEAP_main(id, result);
 }
 /////END-NHA-HANG-S//////
 
@@ -633,6 +862,71 @@ void KOKUSEN_main()
 	}
 }
 
+void KEITEIKEN_main(int num)
+{
+	int count = 0;
+	while (count != num)
+	{
+		vector<int> khuvuc;
+		int smallest = 0;
+		int n = (int)HEAP.heap.size();
+		for (int i = 0; i < n; i++)
+		{
+			if (HEAP.heap[i].freq < HEAP.heap[smallest].freq)
+			{
+				smallest = i;
+			}
+		}
+		for (int i = 0; i < n; i++)
+		{
+			if (HEAP.heap[i].freq == HEAP.heap[smallest].freq)
+			{
+				khuvuc.push_back(i);
+			}
+		}
+		int size1 = (int)HEAP.thutuid.size();
+		int size2 = size1;
+		while (khuvuc.size() != 1)
+		{
+			for (int i = size1 - 1; i >= 0; i--)
+			{
+				int dem = 0;
+				while (dem < (int)(khuvuc.size()))
+				{
+
+					if (HEAP.thutuid[i] == khuvuc[dem])
+					{
+						if (khuvuc.size() > 1)
+						{
+							khuvuc.erase(khuvuc.begin() + dem);
+							HEAP.thutuid.erase(HEAP.thutuid.begin() + i);
+							size2 = HEAP.thutuid.size();
+							break;
+						}
+					}
+					dem++;
+				}
+				if (size2 != size1)
+				{
+					break;
+				}
+			}
+			if (size2 != size1)
+			{
+				break;
+			}
+		}
+		smallest = khuvuc[0];
+		khuvuc.clear();
+		HEAP.minheap_delete(smallest, num);
+		count++;
+	}
+}
+
+void HAND_main()
+{
+}
+
 void LIMITLESS_main(int num)
 {
 	if (!hash_table[num])
@@ -642,6 +936,12 @@ void LIMITLESS_main(int num)
 	LIMITLESS_print(num);
 }
 
+void CLEAVE_main(int num)
+{
+	HEAP.MINHEAP_preorder(0, num);
+}
+
+////////////////
 void LAPSE(string name)
 {
 	LAPSE_main(name);
@@ -652,12 +952,12 @@ void KOKUSEN()
 }
 void KEITEIKEN(int num)
 {
-	cout << "KEITEIKEN"
-		 << " " << num << endl;
+	KEITEIKEN_main(num);
 }
 void HAND()
 {
 	cout << "HAND" << endl;
+	HAND_main();
 }
 void LIMITLESS(int num)
 {
@@ -665,8 +965,7 @@ void LIMITLESS(int num)
 }
 void CLEAVE(int num)
 {
-	cout << "CLEAVE"
-		 << " " << num << endl;
+	CLEAVE_main(num);
 }
 
 ////////////////////
