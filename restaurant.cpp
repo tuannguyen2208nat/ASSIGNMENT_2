@@ -378,25 +378,13 @@ class minheap_node
 public:
 	int id;
 	int freq;
-	deque<int> minheap_node_result;
+	vector<int> minheap_node_result;
 
 	minheap_node(int id, int result)
 	{
 		this->id = id;
 		this->freq = 1;
 		minheap_node_result.push_back(result);
-	}
-
-	void print()
-	{
-		int n = minheap_node_result.size();
-		cout << "id : " << id << " "
-			 << "freq : " << freq << endl;
-		for (int i = 0; i < n; i++)
-		{
-			cout << minheap_node_result[i] << " ";
-		}
-		cout << endl;
 	}
 
 	void MINHEAP_print(int num)
@@ -573,8 +561,18 @@ public:
 		{
 			while (!(heap[vitri].minheap_node_result.empty()))
 			{
+				int size = thutuid.size();
+				int i = 0;
+				for (i = 0; i < size; i++)
+				{
+					if (thutuid[i] == heap[vitri].id)
+					{
+						break;
+					}
+				}
+				thutuid.erase(thutuid.begin() + i);
 				cout << heap[vitri].minheap_node_result.front() << "-" << heap[vitri].id << endl;
-				heap[vitri].minheap_node_result.pop_front();
+				heap[vitri].minheap_node_result.erase(heap[vitri].minheap_node_result.begin());
 			}
 			heap.erase(heap.begin() + vitri);
 		}
@@ -583,8 +581,18 @@ public:
 			int count = 0;
 			while (count != num)
 			{
+				int size = thutuid.size();
+				int i = 0;
+				for (i = 0; i < size; i++)
+				{
+					if (thutuid[i] == heap[vitri].id)
+					{
+						break;
+					}
+				}
+				thutuid.erase(thutuid.begin() + i);
 				cout << heap[vitri].minheap_node_result.front() << "-" << heap[vitri].id << endl;
-				heap[vitri].minheap_node_result.pop_front();
+				heap[vitri].minheap_node_result.erase(heap[vitri].minheap_node_result.begin());
 				heap[vitri].freq -= 1;
 				count++;
 			}
@@ -881,10 +889,11 @@ public:
 
 void KEITEIKEN_main(int num)
 {
+	int NUM = num;
 	int n = HEAP.minheap_size();
 	if (num > n)
 	{
-		num = n;
+		NUM = n;
 	}
 	vector<myarray> khuvuc;
 	for (int i = 0; i < n; i++)
@@ -895,8 +904,8 @@ void KEITEIKEN_main(int num)
 	sort(khuvuc.begin(), khuvuc.end(), [](const myarray &a, const myarray &b)
 		 { return a.freq < b.freq; });
 
-	int num1 = num;
-	for (int i = 0; i < num; i++)
+	int num1 = NUM;
+	for (int i = 0; i < NUM; i++)
 	{
 		int smallest = 0;
 		vector<myarray> vector2;
