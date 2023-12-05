@@ -387,18 +387,6 @@ public:
 		minheap_node_result.push_back(result);
 	}
 
-	void print()
-	{
-		int n = minheap_node_result.size();
-		cout << "id : " << id << " "
-			 << "freq : " << freq << endl;
-		for (int i = 0; i < n; i++)
-		{
-			cout << minheap_node_result[i] << " ";
-		}
-		cout << endl;
-	}
-
 	void MINHEAP_print(int num)
 	{
 		int n = minheap_node_result.size();
@@ -881,10 +869,11 @@ public:
 
 void KEITEIKEN_main(int num)
 {
+	int NUM = num;
 	int n = HEAP.minheap_size();
 	if (num > n)
 	{
-		num = n;
+		NUM = n;
 	}
 	vector<myarray> khuvuc;
 	for (int i = 0; i < n; i++)
@@ -895,8 +884,8 @@ void KEITEIKEN_main(int num)
 	sort(khuvuc.begin(), khuvuc.end(), [](const myarray &a, const myarray &b)
 		 { return a.freq < b.freq; });
 
-	int num1 = num;
-	for (int i = 0; i < num; i++)
+	int num1 = NUM;
+	for (int i = 0; i < NUM; i++)
 	{
 		int smallest = 0;
 		vector<myarray> vector2;
