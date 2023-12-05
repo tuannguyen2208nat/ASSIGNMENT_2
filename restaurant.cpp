@@ -556,27 +556,36 @@ public:
 		return (int)heap.size();
 	}
 
-	void minheap_delete(int vitri, int num)
+	void minheap_delete(int id, int num)
 	{
-		int id = vitri;
-		int n = heap[id].freq;
+		int vitri = 0;
+		int size = heap.size();
+		for (int i = 0; i < size; i++)
+		{
+			if (heap[i].id == id)
+			{
+				vitri = i;
+				break;
+			}
+		}
+		int n = heap[vitri].freq;
 		if (num >= n)
 		{
-			while (!(heap[id].minheap_node_result.empty()))
+			while (!(heap[vitri].minheap_node_result.empty()))
 			{
-				cout << heap[id].minheap_node_result.front() << "-" << heap[id].id << endl;
-				heap[id].minheap_node_result.pop_front();
+				cout << heap[vitri].minheap_node_result.front() << "-" << heap[vitri].id << endl;
+				heap[vitri].minheap_node_result.pop_front();
 			}
-			heap.erase(heap.begin() + id);
+			heap.erase(heap.begin() + vitri);
 		}
 		else
 		{
 			int count = 0;
 			while (count != num)
 			{
-				cout << heap[id].minheap_node_result.front() << "-" << heap[id].id << endl;
-				heap[id].minheap_node_result.pop_front();
-				heap[id].freq -= 1;
+				cout << heap[vitri].minheap_node_result.front() << "-" << heap[vitri].id << endl;
+				heap[vitri].minheap_node_result.pop_front();
+				heap[vitri].freq -= 1;
 				count++;
 			}
 		}
@@ -862,65 +871,74 @@ void KOKUSEN_main()
 	}
 }
 
+class myarray
+{
+public:
+	int id;
+	int freq;
+	myarray(int id, int freq) : id(id), freq(freq) {}
+};
+
 void KEITEIKEN_main(int num)
 {
-	int count = 0;
-	while (count != num)
+	int n = HEAP.minheap_size();
+	if (num > n)
 	{
-		vector<int> khuvuc;
-		int smallest = 0;
-		int n = (int)HEAP.heap.size();
-		for (int i = 0; i < n; i++)
-		{
-			if (HEAP.heap[i].freq < HEAP.heap[smallest].freq)
-			{
-				smallest = i;
-			}
-		}
-		for (int i = 0; i < n; i++)
-		{
-			if (HEAP.heap[i].freq == HEAP.heap[smallest].freq)
-			{
-				khuvuc.push_back(i);
-			}
-		}
-		int size1 = (int)HEAP.thutuid.size();
-		int size2 = size1;
-		while (khuvuc.size() != 1)
-		{
-			for (int i = size1 - 1; i >= 0; i--)
-			{
-				int dem = 0;
-				while (dem < (int)(khuvuc.size()))
-				{
+		num = n;
+	}
+	vector<myarray> khuvuc;
+	for (int i = 0; i < n; i++)
+	{
+		myarray a(HEAP.heap[i].id, HEAP.heap[i].freq);
+		khuvuc.push_back(a);
+	}
+	sort(khuvuc.begin(), khuvuc.end(), [](const myarray &a, const myarray &b)
+		 { return a.freq < b.freq; });
 
-					if (HEAP.thutuid[i] == khuvuc[dem])
-					{
-						if (khuvuc.size() > 1)
-						{
-							khuvuc.erase(khuvuc.begin() + dem);
-							HEAP.thutuid.erase(HEAP.thutuid.begin() + i);
-							size2 = HEAP.thutuid.size();
-							break;
-						}
-					}
-					dem++;
-				}
-				if (size2 != size1)
+	int num1 = num;
+	for (int i = 0; i < num; i++)
+	{
+		int smallest = 0;
+		vector<myarray> vector2;
+		for (int j = 0; j < num1; j++)
+		{
+			if (khuvuc[j].freq == khuvuc[smallest].freq)
+			{
+				myarray a(khuvuc[j].id, khuvuc[j].freq);
+				vector2.push_back(a);
+			}
+		}
+
+		for (int j = HEAP.thutuid.size() - 1; j >= 0; j--)
+		{
+			int dem = 0;
+			while (vector2.size() > 1 && dem < vector2.size())
+			{
+				if (HEAP.thutuid[j] == vector2[dem].id)
 				{
+					vector2.erase(vector2.begin() + dem);
 					break;
 				}
+				dem++;
 			}
-			if (size2 != size1)
+		}
+		for (int j = 0; j < khuvuc.size(); j++)
+		{
+			if (khuvuc[j].id == vector2[0].id)
 			{
+				khuvuc.erase(khuvuc.begin() + j);
 				break;
 			}
 		}
-		smallest = khuvuc[0];
-		khuvuc.clear();
-		HEAP.minheap_delete(smallest, num);
-		count++;
+		HEAP.minheap_delete(vector2[0].id, num);
+		vector2.clear();
+		num1--;
+		if (num1 == 0)
+		{
+			break;
+		}
 	}
+	khuvuc.clear();
 }
 
 void HAND_main()
