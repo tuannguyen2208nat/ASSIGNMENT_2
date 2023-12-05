@@ -378,7 +378,7 @@ class minheap_node
 public:
 	int id;
 	int freq;
-	deque<int> minheap_node_result;
+	vector<int> minheap_node_result;
 
 	minheap_node(int id, int result)
 	{
@@ -561,8 +561,18 @@ public:
 		{
 			while (!(heap[vitri].minheap_node_result.empty()))
 			{
+				int size = thutuid.size();
+				int i = 0;
+				for (i = 0; i < size; i++)
+				{
+					if (thutuid[i] == heap[vitri].id)
+					{
+						break;
+					}
+				}
+				thutuid.erase(thutuid.begin() + i);
 				cout << heap[vitri].minheap_node_result.front() << "-" << heap[vitri].id << endl;
-				heap[vitri].minheap_node_result.pop_front();
+				heap[vitri].minheap_node_result.erase(heap[vitri].minheap_node_result.begin());
 			}
 			heap.erase(heap.begin() + vitri);
 		}
@@ -571,8 +581,18 @@ public:
 			int count = 0;
 			while (count != num)
 			{
+				int size = thutuid.size();
+				int i = 0;
+				for (i = 0; i < size; i++)
+				{
+					if (thutuid[i] == heap[vitri].id)
+					{
+						break;
+					}
+				}
+				thutuid.erase(thutuid.begin() + i);
 				cout << heap[vitri].minheap_node_result.front() << "-" << heap[vitri].id << endl;
-				heap[vitri].minheap_node_result.pop_front();
+				heap[vitri].minheap_node_result.erase(heap[vitri].minheap_node_result.begin());
 				heap[vitri].freq -= 1;
 				count++;
 			}
