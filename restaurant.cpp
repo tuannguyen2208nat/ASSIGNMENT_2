@@ -401,6 +401,25 @@ int HUFFMAN_CODE(const HuffNode<E> *root, node *head)
 	}
 	return result_to_int(result);
 }
+
+template <typename E>
+void HUFFMANTREE_Inorder(const HuffNode<E> *node)
+{
+	if (node)
+	{
+		HUFFMANTREE_Inorder(node->getleft());
+		if (!node->isLeaf())
+		{
+			cout << node->weight() << endl;
+		}
+		else
+		{
+			const LeafNode<E> *leafNode = dynamic_cast<const LeafNode<E> *>(node);
+			cout << leafNode->val() << endl;
+		}
+		HUFFMANTREE_Inorder(node->getright());
+	}
+}
 /////////End-Huffman-tree/////////
 class Linklist
 {
@@ -1070,6 +1089,7 @@ void LAPSE_main(string name)
 	HuffTree<char> *huffmanTree = buildHuff(treeArray, size);
 	if (huffmanTree == nullptr)
 	{
+		hand = nullptr;
 		return;
 	}
 	hand = huffmanTree;
@@ -1167,6 +1187,11 @@ void KEITEIKEN_main(int num)
 
 void HAND_main()
 {
+	if (!hand)
+	{
+		return;
+	}
+	HUFFMANTREE_Inorder(hand->root());
 }
 
 void LIMITLESS_main(int num)
@@ -1198,7 +1223,6 @@ void KEITEIKEN(int num)
 }
 void HAND()
 {
-	cout << "HAND" << endl;
 	HAND_main();
 }
 void LIMITLESS(int num)
