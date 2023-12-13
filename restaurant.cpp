@@ -9,49 +9,175 @@ public:
 	int freq;
 	node *next;
 	node *prev;
-	node() : data('\0'), freq(0), next(nullptr), prev(nullptr){};
 	node(char data, node *temp) : data(data), freq(1), next(nullptr), prev(temp){};
 	node(char data) : data(data), freq(1), next(nullptr), prev(nullptr){};
 };
-///////////Huffman-tree//////////
-int binaryToDecimal(int binaryNumber)
-{
-	int decimalNumber = 0;
-	int base = 1;
-	while (binaryNumber > 0)
-	{
-		int lastDigit = binaryNumber % 10;
-		binaryNumber = binaryNumber / 10;
-		decimalNumber += lastDigit * base;
-		base = base * 2;
-	}
-	return decimalNumber;
-}
-int result_to_int(string result)
-{
-	int n = (int)result.size();
-	string a = "";
 
-	if (n <= 0)
+class Linklist
+{
+public:
+	node *head;
+	node *tail;
+	/////////////////
+	void Linklist_print()
 	{
-		return 0;
-	}
-	else if (n < 10)
-	{
-		for (int i = n - 1; i >= 0; i--)
+		node *temp = head;
+		while (temp != nullptr)
 		{
-			a += result[i];
+			cout << temp->data << " " << temp->freq << endl;
+			temp = temp->next;
 		}
 	}
-	else if (n >= 10)
+	/////////////////
+	void addElement(char data)
 	{
-		for (int i = n - 1; i >= (n - 10); i--)
+		node *temp = head;
+		while (temp != nullptr)
 		{
-			a += result[i];
+			if (temp->data == data)
+			{
+				temp->freq++;
+				return;
+			}
+			temp = temp->next;
+		}
+		node *p = new node(data, tail);
+		tail->next = p;
+		tail = p;
+	}
+	/////////////////
+	int Linklist_size()
+	{
+		int count = 0;
+		node *temp = head;
+		while (temp != nullptr)
+		{
+			count++;
+			temp = temp->next;
+		}
+		return count;
+	}
+	/////////////////
+	node *Linklist_gethead()
+	{
+		return head;
+	}
+	/////////////////
+	void LAPSE_caesar()
+	{
+		node *temp = head;
+		while (temp != nullptr)
+		{
+			if (isalpha(temp->data))
+			{
+				char base = isupper(temp->data) ? 'A' : 'a';
+				temp->data = (temp->data - base + temp->freq) % 26 + base;
+			}
+			temp = temp->next;
 		}
 	}
-	int ketqua = stoi(a);
-	return binaryToDecimal(ketqua);
+	/////////////////
+	node *search_node(char data)
+	{
+		node *current = head;
+		while (current != nullptr)
+		{
+			if (current->data == data)
+			{
+				break;
+			}
+			current = current->next;
+		}
+		return current;
+	}
+	/////////////////
+	void LAPSE_swap(node *a, node *b)
+	{
+		char temp_data = a->data;
+		int temp_freq = a->freq;
+		a->data = b->data;
+		a->freq = b->freq;
+		b->data = temp_data;
+		b->freq = temp_freq;
+	}
+	/////////////////
+	void delete_samenode()
+	{
+		set<char> seenData;
+		node *current = head;
+
+		while (current != nullptr)
+		{
+			if (seenData.count(current->data) > 0)
+			{
+				node *p = search_node(current->data);
+				int n = current->freq;
+				p->freq += n;
+				node *temp = current;
+				current = current->next;
+
+				if (temp->prev != nullptr)
+				{
+					temp->prev->next = temp->next;
+				}
+				else
+				{
+					head = temp->next;
+				}
+
+				if (temp->next != nullptr)
+				{
+					temp->next->prev = temp->prev;
+				}
+				else
+				{
+					tail = temp->prev;
+				}
+
+				delete temp;
+			}
+			else
+			{
+				seenData.insert(current->data);
+				current = current->next;
+			}
+		}
+	}
+	/////////////////
+	void LAPSE_sort()
+	{
+		if (head == nullptr || head->next == nullptr)
+		{
+			return;
+		}
+		bool swapped;
+		node *ptr1;
+		node *lptr = nullptr;
+		do
+		{
+			swapped = false;
+			ptr1 = head;
+
+			while (ptr1->next != lptr)
+			{
+				if (ptr1->freq > ptr1->next->freq || (ptr1->freq == ptr1->next->freq && int(ptr1->data) > int(ptr1->next->data)))
+				{
+					LAPSE_swap(ptr1, ptr1->next);
+					swapped = true;
+				}
+				ptr1 = ptr1->next;
+			}
+			lptr = ptr1;
+		} while (swapped);
+	}
+};
+
+Linklist *newlist(char data)
+{
+	Linklist *arr = new Linklist;
+	arr->head = new node(data);
+	arr->tail = arr->head;
+	return arr;
 }
 
 template <typename E>
@@ -99,7 +225,6 @@ public:
 	int weight() const override { return wgt; }
 	bool isLeaf() const override { return false; }
 };
-
 template <typename E>
 class HuffTree
 {
@@ -128,8 +253,11 @@ public:
 
 	~HuffTree()
 	{
-		delete Root; // Recursively delete nodes
+		delete Root; // Recursively delete nodes}
 	}
+
+	HuffNode<E> *root() const { return Root; }
+	int weight() const { return Root->weight(); }
 
 	int BalanceFactor(const HuffNode<E> *node)
 	{
@@ -179,31 +307,29 @@ public:
 		{
 			return root;
 		}
-
-		// re-balance
 		HuffNode<E> *newRoot = root;
 		if (BalanceFactor(root) <= -1)
 		{
 			HuffNode<E> *leftTree = root->left;
 			if (BalanceFactor(leftTree) >= 1)
-			{ // RH-of-LH
+			{
 				root->left = rotateLeft(root->getleft());
 				newRoot = rotateRight(root);
 			}
 			else
-				newRoot = rotateRight(root); // LH-of-LH or EH-of-LH (if remove)
+				newRoot = rotateRight(root);
 			count++;
 		}
 		else if (BalanceFactor(root) >= 1)
 		{
 			HuffNode<E> *rightTree = root->getright();
 			if (BalanceFactor(rightTree) <= -1)
-			{ // LH-of-RH
+			{
 				root->right = rotateRight(root->right);
 				newRoot = rotateLeft(root);
 			}
 			else
-				newRoot = rotateLeft(root); // RH-of-RH or EH-of-RH (if remove)
+				newRoot = rotateLeft(root);
 			count++;
 		}
 		return newRoot;
@@ -244,15 +370,82 @@ public:
 		}
 	}
 
-	HuffNode<E> *root() const { return Root; }	  // Get root
-	int weight() const { return Root->weight(); } // Root weight
-
 	void duyetcay()
 	{
 		duyetcay2(Root);
 	}
-};
 
+	void encode(const HuffNode<E> *node, string str, unordered_map<char, string> &huffmanCode)
+	{
+		if (node == nullptr)
+		{
+			return;
+		}
+		if (node->isLeaf())
+		{
+			const LeafNode<E> *leafNode = dynamic_cast<const LeafNode<E> *>(node);
+			huffmanCode[leafNode->val()] = str;
+		}
+		encode(node->getleft(), str + "0", huffmanCode);
+		encode(node->getright(), str + "1", huffmanCode);
+	}
+
+	int HUFFMAN_CODE(node *head)
+	{
+		node *temp = head;
+		unordered_map<char, string> huffmanCode;
+		encode(Root, "", huffmanCode);
+		string result = "";
+		while (temp != nullptr)
+		{
+			char ch = temp->data;
+			result += huffmanCode[ch];
+			temp = temp->next;
+		}
+		return result_to_int(result);
+	}
+
+	int binaryToDecimal(int binaryNumber)
+	{
+		int decimalNumber = 0;
+		int base = 1;
+		while (binaryNumber > 0)
+		{
+			int lastDigit = binaryNumber % 10;
+			binaryNumber = binaryNumber / 10;
+			decimalNumber += lastDigit * base;
+			base = base * 2;
+		}
+		return decimalNumber;
+	}
+
+	int result_to_int(string result)
+	{
+		int n = (int)result.size();
+		string a = "";
+
+		if (n <= 0)
+		{
+			return 0;
+		}
+		else if (n < 10)
+		{
+			for (int i = n - 1; i >= 0; i--)
+			{
+				a += result[i];
+			}
+		}
+		else if (n >= 10)
+		{
+			for (int i = n - 1; i >= (n - 10); i--)
+			{
+				a += result[i];
+			}
+		}
+		int ketqua = stoi(a);
+		return binaryToDecimal(ketqua);
+	}
+};
 template <typename E>
 struct minTreeComp
 {
@@ -261,7 +454,6 @@ struct minTreeComp
 		return tree1->weight() < tree2->weight();
 	}
 };
-
 template <typename E, typename C>
 class heap
 {
@@ -345,9 +537,8 @@ public:
 		return heapdata.size();
 	}
 };
-
 template <typename E>
-HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count)
+HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count, bool check_root)
 {
 	heap<HuffTree<E> *, minTreeComp<E>> *forest =
 		new heap<HuffTree<E> *, minTreeComp<E>>(TreeArray, count, count);
@@ -355,53 +546,19 @@ HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count)
 	HuffTree<E> *temp1, *temp2, *temp3 = nullptr;
 	while (forest->size() > 1)
 	{
-		temp1 = forest->removeFirst(); // Pull first two trees
-		temp2 = forest->removeFirst(); // off the list
+		temp1 = forest->removeFirst();
+		temp2 = forest->removeFirst();
 		temp3 = new HuffTree<E>(temp1, temp2);
 		forest->insert(temp3);
 		temp3->duyetcay();
 		if (temp3->root()->isLeaf())
 		{
-			return nullptr;
+			check_root = false;
 		}
-		// Put the new tree back on the list
-		// Note: Memory of temp1 and temp2 will be managed by the heap
 	}
-	delete forest; // Don't forget to delete the heap itself
+	delete forest;
 	return temp3;
 }
-
-template <typename E>
-void encode(const HuffNode<E> *node, string str, unordered_map<char, string> &huffmanCode)
-{
-	if (node == nullptr)
-	{
-		return;
-	}
-	if (node->isLeaf())
-	{
-		const LeafNode<E> *leafNode = dynamic_cast<const LeafNode<E> *>(node);
-		huffmanCode[leafNode->val()] = str;
-	}
-	encode(node->getleft(), str + "0", huffmanCode);
-	encode(node->getright(), str + "1", huffmanCode);
-}
-
-template <typename E>
-int HUFFMAN_CODE(const HuffNode<E> *root, node *head)
-{
-	unordered_map<char, string> huffmanCode;
-	encode(root, "", huffmanCode);
-	string result = "";
-	while (head != nullptr)
-	{
-		char ch = head->data;
-		result += huffmanCode[ch];
-		head = head->next;
-	}
-	return result_to_int(result);
-}
-
 template <typename E>
 void HUFFMANTREE_Inorder(const HuffNode<E> *node)
 {
@@ -420,172 +577,17 @@ void HUFFMANTREE_Inorder(const HuffNode<E> *node)
 		HUFFMANTREE_Inorder(node->getright());
 	}
 }
-/////////End-Huffman-tree/////////
-class Linklist
+template <typename E>
+bool check_number_node(const HuffNode<E> *node)
 {
-public:
-	node *head;
-	node *tail;
-	/////////////////
-	void Linklist_print()
+	if (node->getleft() == nullptr && node->getright() == nullptr)
 	{
-		node *temp = head;
-		while (temp != nullptr)
-		{
-			cout << temp->data << " " << temp->freq << endl;
-			temp = temp->next;
-		}
+		return false;
 	}
-	/////////////////
-	int Linklist_size()
-	{
-		int count = 0;
-		node *temp = head;
-		while (temp != nullptr)
-		{
-			count++;
-			temp = temp->next;
-		}
-		return count;
-	}
-	/////////////////
-	node *Linklist_gethead()
-	{
-		return head;
-	}
-	/////////////////
-	void LAPSE_caesar()
-	{
-		node *temp = head;
-		while (temp != nullptr)
-		{
-			if (isalpha(temp->data))
-			{
-				char base = isupper(temp->data) ? 'A' : 'a';
-				temp->data = (temp->data - base + temp->freq) % 26 + base;
-			}
-			temp = temp->next;
-		}
-	}
-	/////////////////
-	node *search_node(char data)
-	{
-		node *current = head;
-		while (current != nullptr)
-		{
-			if (current->data == data)
-			{
-				break;
-			}
-			current = current->next;
-		}
-		return current;
-	}
-	void delete_samenode()
-	{
-		set<char> seenData;
-		node *current = head;
-
-		while (current != nullptr)
-		{
-			if (seenData.count(current->data) > 0)
-			{
-				node *p = search_node(current->data);
-				int n = current->freq;
-				p->freq += n;
-				node *temp = current;
-				current = current->next;
-
-				if (temp->prev != nullptr)
-				{
-					temp->prev->next = temp->next;
-				}
-				else
-				{
-					head = temp->next;
-				}
-
-				if (temp->next != nullptr)
-				{
-					temp->next->prev = temp->prev;
-				}
-				else
-				{
-					tail = temp->prev;
-				}
-
-				delete temp;
-			}
-			else
-			{
-				seenData.insert(current->data);
-				current = current->next;
-			}
-		}
-	}
-	/////////////////
-};
-
-Linklist *newlist(char data)
-{
-	Linklist *arr = new Linklist;
-	arr->head = new node(data);
-	arr->tail = arr->head;
-	return arr;
-}
-Linklist *addElement(Linklist *arr, char data)
-{
-	node *temp = arr->head;
-	while (temp != nullptr)
-	{
-		if (temp->data == data)
-		{
-			temp->freq++;
-			return arr;
-		}
-		temp = temp->next;
-	}
-	node *p = new node(data, arr->tail);
-	arr->tail->next = p;
-	arr->tail = p;
-	return arr;
+	return true;
 }
 /////////////////
-void swap(node *a, node *b)
-{
-	char temp_data = a->data;
-	int temp_freq = a->freq;
-	a->data = b->data;
-	a->freq = b->freq;
-	b->data = temp_data;
-	b->freq = temp_freq;
-}
-void LAPSE_sort(Linklist &list)
-{
-	if (list.head == nullptr || list.head->next == nullptr)
-	{
-		return;
-	}
-	bool swapped;
-	node *ptr1;
-	node *lptr = nullptr;
-	do
-	{
-		swapped = false;
-		ptr1 = list.head;
 
-		while (ptr1->next != lptr)
-		{
-			if (ptr1->freq > ptr1->next->freq || (ptr1->freq == ptr1->next->freq && int(ptr1->data) > int(ptr1->next->data)))
-			{
-				swap(ptr1, ptr1->next);
-				swapped = true;
-			}
-			ptr1 = ptr1->next;
-		}
-		lptr = ptr1;
-	} while (swapped);
-}
 /////////////////
 
 //////NHA-HANG-S/////
@@ -965,17 +967,15 @@ class hash_table_node
 public:
 	BSTNode *root;
 	queue<int> hash_table_queue;
-	hash_table_node *next;
 
 	hash_table_node(BSTNode *root, int result)
 	{
 		this->root = root;
 		hash_table_queue.push(result);
-		this->next = nullptr;
 	}
 };
 
-hash_table_node *hash_table[10000];
+hash_table_node *hash_table[10000] = {nullptr};
 
 void hash_table_insert(int id, int result)
 {
@@ -1061,6 +1061,9 @@ HuffTree<char> *hand = nullptr;
 
 void LAPSE_main(string name)
 {
+	hand = nullptr;
+	delete hand;
+
 	if ((int)name.size() <= 0)
 	{
 		return;
@@ -1068,7 +1071,7 @@ void LAPSE_main(string name)
 	Linklist *arr = newlist(name[0]);
 	for (int i = 1; i < (int)name.size(); i++)
 	{
-		arr = addElement(arr, name[i]);
+		arr->addElement(name[i]);
 	}
 	if ((arr->Linklist_size()) < 3)
 	{
@@ -1076,7 +1079,7 @@ void LAPSE_main(string name)
 	}
 	arr->LAPSE_caesar();
 	arr->delete_samenode();
-	LAPSE_sort(*arr);
+	arr->LAPSE_sort();
 
 	node *head = arr->Linklist_gethead();
 	const int size = arr->Linklist_size();
@@ -1086,17 +1089,17 @@ void LAPSE_main(string name)
 		treeArray[i] = new HuffTree<char>(head->data, head->freq);
 		head = head->next;
 	}
-	HuffTree<char> *huffmanTree = buildHuff(treeArray, size);
-	if (huffmanTree == nullptr)
+	bool check_root = true;
+	hand = buildHuff(treeArray, size, check_root);
+	if (!check_root)
 	{
-		hand = nullptr;
 		return;
 	}
-	hand = huffmanTree;
-
-	head = arr->Linklist_gethead();
-	int result = HUFFMAN_CODE(huffmanTree->root(), head);
-
+	int result = hand->HUFFMAN_CODE(arr->Linklist_gethead());
+	if (!check_number_node(hand->root()))
+	{
+		result = 0;
+	}
 	(result % 2 == 0) ? nha_hang_s(result) : nha_hang_g(result);
 }
 
@@ -1156,7 +1159,7 @@ void KEITEIKEN_main(int num)
 		for (int j = HEAP.thutuid.size() - 1; j >= 0; j--)
 		{
 			int dem = 0;
-			while (vector2.size() > 1 && dem < vector2.size())
+			while (vector2.size() > 1 && dem < (int)vector2.size())
 			{
 				if (HEAP.thutuid[j] == vector2[dem].id)
 				{
@@ -1166,7 +1169,7 @@ void KEITEIKEN_main(int num)
 				dem++;
 			}
 		}
-		for (int j = 0; j < khuvuc.size(); j++)
+		for (int j = 0; j < (int)khuvuc.size(); j++)
 		{
 			if (khuvuc[j].id == vector2[0].id)
 			{
@@ -1192,6 +1195,8 @@ void HAND_main()
 		return;
 	}
 	HUFFMANTREE_Inorder(hand->root());
+	hand = nullptr;
+	delete hand;
 }
 
 void LIMITLESS_main(int num)
@@ -1208,7 +1213,6 @@ void CLEAVE_main(int num)
 	HEAP.MINHEAP_preorder(0, num);
 }
 
-////////////////
 void LAPSE(string name)
 {
 	LAPSE_main(name);
