@@ -543,6 +543,7 @@ HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count)
 		temp3->duyetcay();
 		if (temp3->root()->isLeaf())
 		{
+			delete forest;
 			return nullptr;
 		}
 	}
