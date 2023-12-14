@@ -528,7 +528,7 @@ public:
 	}
 };
 template <typename E>
-HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count, bool check_root)
+HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count)
 {
 	heap<HuffTree<E> *, minTreeComp<E>> *forest =
 		new heap<HuffTree<E> *, minTreeComp<E>>(TreeArray, count, count);
@@ -543,7 +543,7 @@ HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count, bool check_root)
 		temp3->duyetcay();
 		if (temp3->root()->isLeaf())
 		{
-			check_root = false;
+			return nullptr;
 		}
 	}
 	delete forest;
@@ -1085,9 +1085,8 @@ void LAPSE_main(string name)
 		treeArray[i] = new HuffTree<char>(head->data, head->freq);
 		head = head->next;
 	}
-	bool check_root = true;
-	hand = buildHuff(treeArray, size, check_root);
-	if (!check_root)
+	hand = buildHuff(treeArray, size);
+	if (!hand)
 	{
 		hand = nullptr;
 		return;
