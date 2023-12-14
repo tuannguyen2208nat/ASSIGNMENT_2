@@ -19,16 +19,6 @@ public:
 	node *head;
 	node *tail;
 	/////////////////
-	void Linklist_print()
-	{
-		node *temp = head;
-		while (temp != nullptr)
-		{
-			cout << temp->data << " " << temp->freq << endl;
-			temp = temp->next;
-		}
-	}
-	/////////////////
 	void addElement(char data)
 	{
 		node *temp = head;
@@ -1059,6 +1049,14 @@ void nha_hang_g(int result)
 
 HuffTree<char> *hand = nullptr;
 
+class myarray
+{
+public:
+	int id;
+	int freq;
+	myarray(int id, int freq) : id(id), freq(freq) {}
+};
+
 void LAPSE_main(string name)
 {
 	hand = nullptr;
@@ -1102,7 +1100,6 @@ void LAPSE_main(string name)
 	}
 	(result % 2 == 0) ? nha_hang_s(result) : nha_hang_g(result);
 }
-
 void KOKUSEN_main()
 {
 	for (int id = 1; id <= MAXSIZE; id++)
@@ -1116,15 +1113,6 @@ void KOKUSEN_main()
 		}
 	}
 }
-
-class myarray
-{
-public:
-	int id;
-	int freq;
-	myarray(int id, int freq) : id(id), freq(freq) {}
-};
-
 void KEITEIKEN_main(int num)
 {
 	int NUM = num;
@@ -1177,6 +1165,8 @@ void KEITEIKEN_main(int num)
 				break;
 			}
 		}
+		int ID = vector2[0].id;
+		HEAP.thutuid.push_back(ID);
 		HEAP.minheap_delete(vector2[0].id, num);
 		vector2.clear();
 		num1--;
@@ -1187,7 +1177,6 @@ void KEITEIKEN_main(int num)
 	}
 	khuvuc.clear();
 }
-
 void HAND_main()
 {
 	if (!hand)
@@ -1198,7 +1187,6 @@ void HAND_main()
 	hand = nullptr;
 	delete hand;
 }
-
 void LIMITLESS_main(int num)
 {
 	if (!hash_table[num])
@@ -1207,7 +1195,6 @@ void LIMITLESS_main(int num)
 	}
 	LIMITLESS_print(num);
 }
-
 void CLEAVE_main(int num)
 {
 	HEAP.MINHEAP_preorder(0, num);
@@ -1223,6 +1210,10 @@ void KOKUSEN()
 }
 void KEITEIKEN(int num)
 {
+	if (num < 1 || num > MAXSIZE)
+	{
+		return;
+	}
 	KEITEIKEN_main(num);
 }
 void HAND()
@@ -1231,10 +1222,18 @@ void HAND()
 }
 void LIMITLESS(int num)
 {
+	if (num < 1 || num > MAXSIZE)
+	{
+		return;
+	}
 	LIMITLESS_main(num);
 }
 void CLEAVE(int num)
 {
+	if (num < 0)
+	{
+		return;
+	}
 	CLEAVE_main(num);
 }
 
