@@ -1089,6 +1089,7 @@ void LAPSE_main(string name)
 	hand = buildHuff(treeArray, size, check_root);
 	if (!check_root)
 	{
+		hand = nullptr;
 		return;
 	}
 	int result = hand->HUFFMAN_CODE(arr->Linklist_gethead());
