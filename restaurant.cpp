@@ -578,8 +578,6 @@ bool check_number_node(const HuffNode<E> *node)
 }
 /////////////////
 
-/////////////////
-
 //////NHA-HANG-S/////
 class minheap_node
 {
@@ -1184,8 +1182,6 @@ void HAND_main()
 		return;
 	}
 	HUFFMANTREE_Inorder(hand->root());
-	hand = nullptr;
-	delete hand;
 }
 void LIMITLESS_main(int num)
 {
