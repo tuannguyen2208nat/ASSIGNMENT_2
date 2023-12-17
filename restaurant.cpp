@@ -9,216 +9,31 @@ public:
 	int freq;
 	node *next;
 	node *prev;
-	node() : data('\0'), freq(0), next(nullptr), prev(nullptr){};
 	node(char data, node *temp) : data(data), freq(1), next(nullptr), prev(temp){};
 	node(char data) : data(data), freq(1), next(nullptr), prev(nullptr){};
 };
-///////////Huffman-tree//////////
-class AVLNode
-{
-public:
-	char data;
-	int freq;
-	AVLNode *left;
-	AVLNode *right;
-	int vitri;
-	string mahoa;
 
-	AVLNode(char data, int freq, int vitri)
-	{
-		left = right = NULL;
-		this->data = data;
-		this->freq = freq;
-		this->vitri = vitri;
-		this->mahoa = "";
-	}
-};
-int treeLevel(AVLNode *t)
-{
-	if (t == NULL)
-		return -1;
-	return 1 + max(treeLevel(t->left), treeLevel(t->right));
-}
-AVLNode *turnRight(AVLNode *a)
-{
-	AVLNode *b = a->left;
-	AVLNode *d = b->right;
-	a->left = d;
-	b->right = a;
-	return b;
-}
-AVLNode *turnLeft(AVLNode *a)
-{
-	AVLNode *b = a->right;
-	AVLNode *c = b->left;
-	a->right = c;
-	b->left = a;
-	return b;
-}
-bool checkAvl(AVLNode *t)
-{
-	if (t == NULL)
-		return true;
-	if (abs(treeLevel(t->left) - treeLevel(t->right)) > 1)
-		return false;
-	return checkAvl(t->left) && checkAvl(t->right);
-}
-AVLNode *updateTreeAvl(AVLNode *t)
-{
-	if (abs(treeLevel(t->left) - treeLevel(t->right)) > 1)
-	{
-		if (treeLevel(t->left) > treeLevel(t->right))
-		{
-			AVLNode *p = t->left;
-			if (treeLevel(p->left) >= treeLevel(p->right))
-			{
-				t = turnRight(t);
-			}
-			else
-			{
-				t->left = turnLeft(t->left);
-				t = turnRight(t);
-			}
-		}
-		else
-		{
-			AVLNode *p = t->right;
-			if (treeLevel(p->right) >= treeLevel(p->left))
-			{
-				t = turnLeft(t);
-			}
-			else
-			{
-				t->right = turnRight(t->right);
-				t = turnLeft(t);
-			}
-		}
-	}
-	if (t->left != NULL)
-		t->left = updateTreeAvl(t->left);
-	if (t->right != NULL)
-		t->right = updateTreeAvl(t->right);
-	return t;
-}
-struct compare
-{
-	bool operator()(AVLNode *l, AVLNode *r)
-	{
-		if (l->freq == r->freq)
-		{
-			return l->vitri > r->vitri;
-		}
-		return (l->freq > r->freq);
-	}
-};
-void encode(AVLNode *root, string str,
-			unordered_map<char, string> &huffmanCode)
-{
-	if (root == nullptr)
-		return;
-
-	if (root->data != '$')
-	{
-		huffmanCode[root->data] = str;
-	}
-
-	encode(root->left, str + "0", huffmanCode);
-	encode(root->right, str + "1", huffmanCode);
-}
-int binaryToDecimal(int binaryNumber)
-{
-	int decimalNumber = 0;
-	int base = 1;
-	while (binaryNumber > 0)
-	{
-		int lastDigit = binaryNumber % 10;
-		binaryNumber = binaryNumber / 10;
-		decimalNumber += lastDigit * base;
-		base = base * 2;
-	}
-	return decimalNumber;
-}
-int result_to_int(string result)
-{
-	int n = (int)result.size();
-	string a = "";
-
-	if (n <= 0)
-	{
-		return 0;
-	}
-	else if (n < 10)
-	{
-		for (int i = n - 1; i >= 0; i--)
-		{
-			a += result[i];
-		}
-	}
-	else if (n >= 10)
-	{
-		for (int i = n - 1; i >= (n - 10); i--)
-		{
-			a += result[i];
-		}
-	}
-	int ketqua = stoi(a);
-	return binaryToDecimal(ketqua);
-}
-int HuffmanCodes(node *head)
-{
-	AVLNode *left, *right, *top;
-	priority_queue<AVLNode *, vector<AVLNode *>, compare> minHeap;
-	node *temp = head;
-	int i = 0;
-	while (temp != nullptr)
-	{
-		minHeap.push(new AVLNode(temp->data, temp->freq, i));
-		temp = temp->next;
-	}
-	while (minHeap.size() != 1)
-	{
-		left = minHeap.top();
-		minHeap.pop();
-
-		right = minHeap.top();
-		minHeap.pop();
-		top = new AVLNode('$', left->freq + right->freq, i);
-		i++;
-		top->left = left;
-		top->right = right;
-		while (!checkAvl(top))
-		{
-			top = updateTreeAvl(top);
-		}
-		minHeap.push(top);
-	}
-	AVLNode *root = minHeap.top();
-	unordered_map<char, string> huffmanCode;
-	encode(root, "", huffmanCode);
-	string result = "";
-	while (head != nullptr)
-	{
-		char ch = head->data;
-		result += huffmanCode[ch];
-		head = head->next;
-	}
-	return result_to_int(result);
-}
-/////////End-Huffman-tree/////////
 class Linklist
 {
 public:
 	node *head;
 	node *tail;
 	/////////////////
-	void Linklist_print()
+	void addElement(char data)
 	{
 		node *temp = head;
 		while (temp != nullptr)
 		{
-			cout << temp->data << " " << temp->freq << endl;
+			if (temp->data == data)
+			{
+				temp->freq++;
+				return;
+			}
 			temp = temp->next;
 		}
+		node *p = new node(data, tail);
+		tail->next = p;
+		tail = p;
 	}
 	/////////////////
 	int Linklist_size()
@@ -265,6 +80,17 @@ public:
 		}
 		return current;
 	}
+	/////////////////
+	void LAPSE_swap(node *a, node *b)
+	{
+		char temp_data = a->data;
+		int temp_freq = a->freq;
+		a->data = b->data;
+		a->freq = b->freq;
+		b->data = temp_data;
+		b->freq = temp_freq;
+	}
+	/////////////////
 	void delete_samenode()
 	{
 		set<char> seenData;
@@ -308,6 +134,32 @@ public:
 		}
 	}
 	/////////////////
+	void LAPSE_sort()
+	{
+		if (head == nullptr || head->next == nullptr)
+		{
+			return;
+		}
+		bool swapped;
+		node *ptr1;
+		node *lptr = nullptr;
+		do
+		{
+			swapped = false;
+			ptr1 = head;
+
+			while (ptr1->next != lptr)
+			{
+				if (ptr1->freq > ptr1->next->freq || (ptr1->freq == ptr1->next->freq && int(ptr1->data) > int(ptr1->next->data)))
+				{
+					LAPSE_swap(ptr1, ptr1->next);
+					swapped = true;
+				}
+				ptr1 = ptr1->next;
+			}
+			lptr = ptr1;
+		} while (swapped);
+	}
 };
 
 Linklist *newlist(char data)
@@ -317,58 +169,390 @@ Linklist *newlist(char data)
 	arr->tail = arr->head;
 	return arr;
 }
-Linklist *addElement(Linklist *arr, char data)
-{
-	node *temp = arr->head;
-	while (temp != nullptr)
-	{
-		if (temp->data == data)
-		{
-			temp->freq++;
-			return arr;
-		}
-		temp = temp->next;
-	}
-	node *p = new node(data, arr->tail);
-	arr->tail->next = p;
-	arr->tail = p;
-	return arr;
-}
-/////////////////
-void swap(node *a, node *b)
-{
-	char temp_data = a->data;
-	int temp_freq = a->freq;
-	a->data = b->data;
-	a->freq = b->freq;
-	b->data = temp_data;
-	b->freq = temp_freq;
-}
-void LAPSE_sort(Linklist &list)
-{
-	if (list.head == nullptr || list.head->next == nullptr)
-	{
-		return;
-	}
-	bool swapped;
-	node *ptr1;
-	node *lptr = nullptr;
-	do
-	{
-		swapped = false;
-		ptr1 = list.head;
 
-		while (ptr1->next != lptr)
+template <typename E>
+class HuffNode
+{
+public:
+	HuffNode<E> *left;				 // left child
+	HuffNode<E> *right;				 // right child
+	virtual ~HuffNode() {}			 // Base destructor
+	virtual int weight() const = 0;	 // Return frequency
+	virtual bool isLeaf() const = 0; // Determine type
+	HuffNode<E> *getleft() const { return left; }
+	HuffNode<E> *getright() const { return right; }
+};
+template <typename E>
+class LeafNode : public HuffNode<E>
+{
+private:
+	E it;	 // Value
+	int wgt; // Weight
+public:
+	LeafNode(const E &val, int freq) // Constructor
+	{
+		this->it = val;
+		this->wgt = freq;
+		this->left = nullptr;
+		this->right = nullptr;
+	}
+	int weight() const override { return wgt; }
+	E val() const { return it; }
+	bool isLeaf() const override { return true; }
+};
+template <typename E>
+class IntlNode : public HuffNode<E>
+{
+private:
+	int wgt; // Subtree weight
+public:
+	IntlNode(HuffNode<E> *l, HuffNode<E> *r)
+	{
+		this->left = l;
+		this->right = r;
+		this->wgt = l->weight() + r->weight();
+	}
+	int weight() const override { return wgt; }
+	bool isLeaf() const override { return false; }
+};
+template <typename E>
+class HuffTree
+{
+public:
+	HuffNode<E> *Root; // Tree root
+protected:
+	int getHeightRec(const HuffNode<E> *node)
+	{
+		if (node)
 		{
-			if (ptr1->freq > ptr1->next->freq || (ptr1->freq == ptr1->next->freq && int(ptr1->data) > int(ptr1->next->data)))
-			{
-				swap(ptr1, ptr1->next);
-				swapped = true;
-			}
-			ptr1 = ptr1->next;
+			int lh = getHeightRec(node->getleft());
+			int rh = getHeightRec(node->getright());
+			return 1 + max(lh, rh);
 		}
-		lptr = ptr1;
-	} while (swapped);
+		return 0;
+	}
+
+public:
+	// Leaf constructor
+	HuffTree(E &val, int freq)
+		: Root(new LeafNode<E>(val, freq)) {}
+
+	// Internal node constructor
+	HuffTree(HuffTree<E> *l, HuffTree<E> *r)
+		: Root(new IntlNode<E>(l->root(), r->root())) {}
+
+	~HuffTree()
+	{
+		delete Root; // Recursively delete nodes}
+	}
+
+	HuffNode<E> *root() const { return Root; }
+	int weight() const { return Root->weight(); }
+
+	int BalanceFactor(const HuffNode<E> *node)
+	{
+		if (node)
+		{
+			return getHeightRec(node->getright()) - getHeightRec(node->getleft());
+		}
+		return 0;
+	}
+
+	bool check_avl(const HuffNode<E> *node)
+	{
+		if (abs(BalanceFactor(node)) > 1)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	HuffNode<E> *rotateLeft(HuffNode<E> *node)
+	{
+		HuffNode<E> *newRoot = node->right;
+		node->right = newRoot->left;
+		newRoot->left = node;
+		return newRoot;
+	}
+
+	HuffNode<E> *rotateRight(HuffNode<E> *node)
+	{
+		HuffNode<E> *newRoot = node->left;
+		node->left = newRoot->right;
+		newRoot->right = node;
+		return newRoot;
+	}
+
+	HuffNode<E> *rebalance(HuffNode<E> *root)
+	{
+		if (root == nullptr)
+		{
+			return root;
+		}
+		if (BalanceFactor(root) >= -1 && BalanceFactor(root) <= 1)
+		{
+			return root;
+		}
+
+		HuffNode<E> *newRoot = root;
+		if (BalanceFactor(root) <= -1)
+		{
+			HuffNode<E> *leftTree = root->getleft();
+			if (BalanceFactor(leftTree) >= 1)
+			{
+				root->left = rotateLeft(root->getleft());
+				newRoot = rotateRight(root);
+			}
+			else
+				newRoot = rotateRight(root);
+		}
+		else if (BalanceFactor(root) >= 1)
+		{
+			HuffNode<E> *rightTree = root->getright();
+			if (BalanceFactor(rightTree) <= -1)
+			{
+				root->right = rotateRight(root->right);
+				newRoot = rotateLeft(root);
+			}
+			else
+				newRoot = rotateLeft(root);
+		}
+		return newRoot;
+	}
+
+	void duyetcay(HuffNode<E> *&node)
+	{
+		if (!node)
+		{
+			return;
+		}
+
+		for (int i = 0; i < 3; i++)
+		{
+			if (!check_avl(node))
+			{
+				node = rebalance(node);
+			}
+			else
+			{
+				break;
+			}
+		}
+		duyetcay(node->left);
+		duyetcay(node->right);
+	}
+
+	void encode(const HuffNode<E> *node, string str, unordered_map<char, string> &huffmanCode)
+	{
+		if (node == nullptr)
+		{
+			return;
+		}
+		if (node->isLeaf())
+		{
+			const LeafNode<E> *leafNode = dynamic_cast<const LeafNode<E> *>(node);
+			huffmanCode[leafNode->val()] = str;
+		}
+		encode(node->getleft(), str + "0", huffmanCode);
+		encode(node->getright(), str + "1", huffmanCode);
+	}
+
+	int HUFFMAN_CODE(node *head)
+	{
+		node *temp = head;
+		unordered_map<char, string> huffmanCode;
+		encode(Root, "", huffmanCode);
+		string result = "";
+		while (temp != nullptr)
+		{
+			char ch = temp->data;
+			result += huffmanCode[ch];
+			temp = temp->next;
+		}
+		return result_to_int(result);
+	}
+
+	int binaryToDecimal(int binaryNumber)
+	{
+		int decimalNumber = 0;
+		int base = 1;
+		while (binaryNumber > 0)
+		{
+			int lastDigit = binaryNumber % 10;
+			binaryNumber = binaryNumber / 10;
+			decimalNumber += lastDigit * base;
+			base = base * 2;
+		}
+		return decimalNumber;
+	}
+
+	int result_to_int(string result)
+	{
+		int n = (int)result.size();
+		string a = "";
+
+		if (n <= 0)
+		{
+			return 0;
+		}
+		else if (n < 10)
+		{
+			for (int i = n - 1; i >= 0; i--)
+			{
+				a += result[i];
+			}
+		}
+		else if (n >= 10)
+		{
+			for (int i = n - 1; i >= (n - 10); i--)
+			{
+				a += result[i];
+			}
+		}
+		int ketqua = stoi(a);
+		return binaryToDecimal(ketqua);
+	}
+};
+template <typename E>
+struct minTreeComp
+{
+	bool operator()(const HuffTree<E> *tree1, const HuffTree<E> *tree2) const
+	{
+		return tree1->weight() < tree2->weight();
+	}
+};
+template <typename E, typename C>
+class heap
+{
+private:
+	vector<E> heapdata;
+	C comparator;
+
+public:
+	heap(E arr[], int n, int maxsize)
+	{
+		heapdata.reserve(maxsize);
+		for (int i = 0; i < n; ++i)
+		{
+			heapdata.push_back(arr[i]);
+		}
+		buildHeap();
+	}
+
+	void buildHeap()
+	{
+		int n = heapdata.size();
+		for (int i = n / 2 - 1; i >= 0; --i)
+		{
+			heapify(i);
+		}
+	}
+
+	void heapify(int i)
+	{
+		int n = heapdata.size();
+		int smallest = i;
+		int left = 2 * i + 1;
+		int right = 2 * i + 2;
+
+		if (left < n && comparator(heapdata[left], heapdata[smallest]))
+		{
+			smallest = left;
+		}
+
+		if (right < n && comparator(heapdata[right], heapdata[smallest]))
+		{
+			smallest = right;
+		}
+
+		if (smallest != i)
+		{
+			std::swap(heapdata[i], heapdata[smallest]);
+			heapify(smallest);
+		}
+	}
+
+	void insert(const E &item)
+	{
+		heapdata.push_back(item);
+		int i = heapdata.size() - 1;
+
+		while (i > 0 && comparator(heapdata[i], heapdata[(i - 1) / 2]))
+		{
+			std::swap(heapdata[i], heapdata[(i - 1) / 2]);
+			i = (i - 1) / 2;
+		}
+	}
+
+	E removeFirst()
+	{
+		if (heapdata.empty())
+		{
+			throw std::out_of_range("Heap is empty");
+		}
+
+		E first = heapdata[0];
+		heapdata[0] = heapdata.back();
+		heapdata.pop_back();
+		heapify(0);
+
+		return first;
+	}
+
+	int size() const
+	{
+		return heapdata.size();
+	}
+};
+template <typename E>
+HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count)
+{
+	heap<HuffTree<E> *, minTreeComp<E>> *forest =
+		new heap<HuffTree<E> *, minTreeComp<E>>(TreeArray, count, count);
+
+	HuffTree<E> *temp1, *temp2, *temp3 = nullptr;
+	while (forest->size() > 1)
+	{
+		temp1 = forest->removeFirst();
+		temp2 = forest->removeFirst();
+		temp3 = new HuffTree<E>(temp1, temp2);
+		temp3->duyetcay(temp3->Root);
+		if (temp3->root()->isLeaf())
+		{
+			delete forest;
+			return nullptr;
+		}
+		forest->insert(temp3);
+	}
+	delete forest;
+	return temp3;
+}
+template <typename E>
+void HUFFMANTREE_Inorder(const HuffNode<E> *node)
+{
+	if (node)
+	{
+		HUFFMANTREE_Inorder(node->getleft());
+		if (!node->isLeaf())
+		{
+			cout << node->weight() << endl;
+		}
+		else
+		{
+			const LeafNode<E> *leafNode = dynamic_cast<const LeafNode<E> *>(node);
+			cout << leafNode->val() << endl;
+		}
+		HUFFMANTREE_Inorder(node->getright());
+	}
+}
+template <typename E>
+bool check_number_node(const HuffNode<E> *node)
+{
+	if (node->getleft() == nullptr && node->getright() == nullptr)
+	{
+		return false;
+	}
+	return true;
 }
 /////////////////
 
@@ -749,17 +933,15 @@ class hash_table_node
 public:
 	BSTNode *root;
 	queue<int> hash_table_queue;
-	hash_table_node *next;
 
 	hash_table_node(BSTNode *root, int result)
 	{
 		this->root = root;
 		hash_table_queue.push(result);
-		this->next = nullptr;
 	}
 };
 
-hash_table_node *hash_table[10000];
+hash_table_node *hash_table[10000] = {nullptr};
 
 void hash_table_insert(int id, int result)
 {
@@ -841,8 +1023,21 @@ void nha_hang_g(int result)
 }
 /////END-NHA-HANG-G//////
 
+HuffTree<char> *hand = nullptr;
+
+class myarray
+{
+public:
+	int id;
+	int freq;
+	myarray(int id, int freq) : id(id), freq(freq) {}
+};
+
 void LAPSE_main(string name)
 {
+	hand = nullptr;
+	delete hand;
+
 	if ((int)name.size() <= 0)
 	{
 		return;
@@ -850,7 +1045,7 @@ void LAPSE_main(string name)
 	Linklist *arr = newlist(name[0]);
 	for (int i = 1; i < (int)name.size(); i++)
 	{
-		arr = addElement(arr, name[i]);
+		arr->addElement(name[i]);
 	}
 	if ((arr->Linklist_size()) < 3)
 	{
@@ -858,13 +1053,29 @@ void LAPSE_main(string name)
 	}
 	arr->LAPSE_caesar();
 	arr->delete_samenode();
+	arr->LAPSE_sort();
 
-	LAPSE_sort(*arr);
 	node *head = arr->Linklist_gethead();
-	int result = HuffmanCodes(head);
+	const int size = arr->Linklist_size();
+	HuffTree<char> *treeArray[size];
+	for (int i = 0; i < size; ++i)
+	{
+		treeArray[i] = new HuffTree<char>(head->data, head->freq);
+		head = head->next;
+	}
+	hand = buildHuff(treeArray, size);
+	if (!hand)
+	{
+		hand = nullptr;
+		return;
+	}
+	int result = hand->HUFFMAN_CODE(arr->Linklist_gethead());
+	if (!check_number_node(hand->root()))
+	{
+		result = 0;
+	}
 	(result % 2 == 0) ? nha_hang_s(result) : nha_hang_g(result);
 }
-
 void KOKUSEN_main()
 {
 	for (int id = 1; id <= MAXSIZE; id++)
@@ -878,15 +1089,6 @@ void KOKUSEN_main()
 		}
 	}
 }
-
-class myarray
-{
-public:
-	int id;
-	int freq;
-	myarray(int id, int freq) : id(id), freq(freq) {}
-};
-
 void KEITEIKEN_main(int num)
 {
 	int NUM = num;
@@ -921,7 +1123,7 @@ void KEITEIKEN_main(int num)
 		for (int j = HEAP.thutuid.size() - 1; j >= 0; j--)
 		{
 			int dem = 0;
-			while (vector2.size() > 1 && dem < vector2.size())
+			while (vector2.size() > 1 && dem < (int)vector2.size())
 			{
 				if (HEAP.thutuid[j] == vector2[dem].id)
 				{
@@ -931,7 +1133,7 @@ void KEITEIKEN_main(int num)
 				dem++;
 			}
 		}
-		for (int j = 0; j < khuvuc.size(); j++)
+		for (int j = 0; j < (int)khuvuc.size(); j++)
 		{
 			if (khuvuc[j].id == vector2[0].id)
 			{
@@ -939,6 +1141,8 @@ void KEITEIKEN_main(int num)
 				break;
 			}
 		}
+		int ID = vector2[0].id;
+		HEAP.thutuid.push_back(ID);
 		HEAP.minheap_delete(vector2[0].id, num);
 		vector2.clear();
 		num1--;
@@ -949,11 +1153,14 @@ void KEITEIKEN_main(int num)
 	}
 	khuvuc.clear();
 }
-
 void HAND_main()
 {
+	if (!hand)
+	{
+		return;
+	}
+	HUFFMANTREE_Inorder(hand->root());
 }
-
 void LIMITLESS_main(int num)
 {
 	if (!hash_table[num])
@@ -962,13 +1169,11 @@ void LIMITLESS_main(int num)
 	}
 	LIMITLESS_print(num);
 }
-
 void CLEAVE_main(int num)
 {
 	HEAP.MINHEAP_preorder(0, num);
 }
 
-////////////////
 void LAPSE(string name)
 {
 	LAPSE_main(name);
@@ -979,19 +1184,30 @@ void KOKUSEN()
 }
 void KEITEIKEN(int num)
 {
+	if (num < 1 || num > MAXSIZE)
+	{
+		return;
+	}
 	KEITEIKEN_main(num);
 }
 void HAND()
 {
-	cout << "HAND" << endl;
 	HAND_main();
 }
 void LIMITLESS(int num)
 {
+	if (num < 1 || num > MAXSIZE)
+	{
+		return;
+	}
 	LIMITLESS_main(num);
 }
 void CLEAVE(int num)
 {
+	if (num < 0)
+	{
+		return;
+	}
 	CLEAVE_main(num);
 }
 
