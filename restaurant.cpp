@@ -218,15 +218,15 @@ public:
 template <typename E>
 class HuffTree
 {
-private:
+public:
 	HuffNode<E> *Root; // Tree root
 protected:
 	int getHeightRec(const HuffNode<E> *node)
 	{
 		if (node)
 		{
-			int lh = this->getHeightRec(node->getleft());
-			int rh = this->getHeightRec(node->getright());
+			int lh = getHeightRec(node->getleft());
+			int rh = getHeightRec(node->getright());
 			return 1 + max(lh, rh);
 		}
 		return 0;
@@ -260,7 +260,7 @@ public:
 
 	bool check_avl(const HuffNode<E> *node)
 	{
-		if (abs(BalanceFactor(node) > 1))
+		if (abs(BalanceFactor(node)) > 1)
 		{
 			return false;
 		}
@@ -283,24 +283,21 @@ public:
 		return newRoot;
 	}
 
-	HuffNode<E> *rebalance(HuffNode<E> *root, int &count)
+	HuffNode<E> *rebalance(HuffNode<E> *root)
 	{
-		if (count >= 3)
-		{
-			return root;
-		}
 		if (root == nullptr)
 		{
 			return root;
 		}
-		if (BalanceFactor(root) == 0)
+		if (BalanceFactor(root) >= -1 && BalanceFactor(root) <= 1)
 		{
 			return root;
 		}
+
 		HuffNode<E> *newRoot = root;
 		if (BalanceFactor(root) <= -1)
 		{
-			HuffNode<E> *leftTree = root->left;
+			HuffNode<E> *leftTree = root->getleft();
 			if (BalanceFactor(leftTree) >= 1)
 			{
 				root->left = rotateLeft(root->getleft());
@@ -308,7 +305,6 @@ public:
 			}
 			else
 				newRoot = rotateRight(root);
-			count++;
 		}
 		else if (BalanceFactor(root) >= 1)
 		{
@@ -320,49 +316,30 @@ public:
 			}
 			else
 				newRoot = rotateLeft(root);
-			count++;
 		}
 		return newRoot;
 	}
 
-	void duyetcay2(HuffNode<E> *node)
+	void duyetcay(HuffNode<E> *&node)
 	{
-		if (node)
+		if (!node)
+		{
+			return;
+		}
+
+		for (int i = 0; i < 3; i++)
 		{
 			if (!check_avl(node))
 			{
-				int count = 0;
-				if (node == Root)
-				{
-					while (count < 3)
-					{
-						Root = rebalance(Root, count);
-						if (check_avl(Root))
-						{
-							break;
-						}
-					}
-				}
-				else
-				{
-					while (count < 3)
-					{
-						node = rebalance(node, count);
-						if (check_avl(node))
-						{
-							break;
-						}
-					}
-				}
+				node = rebalance(node);
 			}
-			duyetcay2(node->left);
-			duyetcay2(node->right);
+			else
+			{
+				break;
+			}
 		}
-	}
-
-	void duyetcay()
-	{
-		duyetcay2(Root);
+		duyetcay(node->left);
+		duyetcay(node->right);
 	}
 
 	void encode(const HuffNode<E> *node, string str, unordered_map<char, string> &huffmanCode)
@@ -539,13 +516,13 @@ HuffTree<E> *buildHuff(HuffTree<E> **TreeArray, int count)
 		temp1 = forest->removeFirst();
 		temp2 = forest->removeFirst();
 		temp3 = new HuffTree<E>(temp1, temp2);
-		forest->insert(temp3);
-		temp3->duyetcay();
+		temp3->duyetcay(temp3->Root);
 		if (temp3->root()->isLeaf())
 		{
 			delete forest;
 			return nullptr;
 		}
+		forest->insert(temp3);
 	}
 	delete forest;
 	return temp3;
